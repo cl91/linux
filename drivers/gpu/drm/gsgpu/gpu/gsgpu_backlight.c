@@ -2,6 +2,7 @@
 #include <linux/types.h>
 #include <linux/gpio.h>
 #include <linux/pwm.h>
+#include <linux/backlight.h>
 #include "gsgpu.h"
 #include "gsgpu_dc_vbios.h"
 #include "gsgpu_backlight.h"
