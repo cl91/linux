@@ -710,7 +710,7 @@ static void synaptics_pass_pt_packet(struct synaptics_data *priv, u8 *packet)
 	if (priv->pt_port_open) {
 		struct psmouse *child = psmouse_from_serio(ptport);
 
-		if (child->state == PSMOUSE_ACTIVATED) {
+		if (child && child->state == PSMOUSE_ACTIVATED) {
 			serio_interrupt(ptport, packet[4], 0);
 			serio_interrupt(ptport, packet[5], 0);
 			if (child->pktsize == 4)

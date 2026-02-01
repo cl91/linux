@@ -120,7 +120,7 @@ struct psmouse *psmouse_from_serio(struct serio *serio)
 {
 	struct ps2dev *ps2dev = serio_get_drvdata(serio);
 
-	return container_of(ps2dev, struct psmouse, ps2dev);
+	return ps2dev ? container_of(ps2dev, struct psmouse, ps2dev) : NULL;
 }
 
 void psmouse_report_standard_buttons(struct input_dev *dev, u8 buttons)
