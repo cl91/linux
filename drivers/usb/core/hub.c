@@ -2138,7 +2138,9 @@ static void update_port_device_state(struct usb_device *udev)
 		if (hub) {
 			port_dev = hub->ports[udev->portnum - 1];
 			WRITE_ONCE(port_dev->state, udev->state);
+#ifdef CONFIG_KERNFS
 			sysfs_notify_dirent(port_dev->state_kn);
+#endif
 		}
 	}
 }

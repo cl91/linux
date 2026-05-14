@@ -772,12 +772,14 @@ int usb_hub_create_port_device(struct usb_hub *hub, int port1)
 		return retval;
 	}
 
+#ifdef CONFIG_KERNFS
 	port_dev->state_kn = sysfs_get_dirent(port_dev->dev.kobj.sd, "state");
 	if (!port_dev->state_kn) {
 		dev_err(&port_dev->dev, "failed to sysfs_get_dirent 'state'\n");
 		retval = -ENODEV;
 		goto err_unregister;
 	}
+#endif
 
 	/* Set default policy of port-poweroff disabled. */
 	retval = dev_pm_qos_add_request(&port_dev->dev, port_dev->req,
@@ -828,8 +830,10 @@ int usb_hub_create_port_device(struct usb_hub *hub, int port1)
 	return 0;
 
 err_put_kn:
+#ifdef CONFIG_KERNFS
 	sysfs_put(port_dev->state_kn);
 err_unregister:
+#endif
 	device_unregister(&port_dev->dev);
 
 	return retval;
@@ -844,6 +848,8 @@ void usb_hub_remove_port_device(struct usb_hub *hub, int port1)
 	if (peer)
 		unlink_peers(port_dev, peer);
 	component_del(&port_dev->dev, &connector_ops);
+#ifdef CONFIG_KERNFS
 	sysfs_put(port_dev->state_kn);
+#endif
 	device_unregister(&port_dev->dev);
 }

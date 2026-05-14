@@ -107,7 +107,9 @@ struct usb_port {
 	struct dev_pm_qos_request *req;
 	enum usb_port_connect_type connect_type;
 	enum usb_device_state state;
+#ifdef CONFIG_KERNFS
 	struct kernfs_node *state_kn;
+#endif
 	usb_port_location_t location;
 	struct mutex status_lock;
 	u32 over_current_count;
