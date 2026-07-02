@@ -10,7 +10,7 @@ config DRM_XE
 	# we need shmfs for the swappable backing store, and in particular
 	# the shmem_readpage() which depends upon tmpfs
 	select SHMEM
-	select TMPFS
+	select TMPFS if KERNEL
 	select DRM_BUDDY
 	select DRM_CLIENT_SELECTION
 	select DRM_KMS_HELPER
