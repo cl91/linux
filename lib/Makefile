@@ -34,31 +34,47 @@ CFLAGS_string.o += -fno-stack-protector
 endif
 
 lib-y := ctype.o string.o vsprintf.o cmdline.o \
-	 rbtree.o radix-tree.o timerqueue.o xarray.o \
-	 maple_tree.o idr.o extable.o irq_regs.o argv_split.o \
-	 flex_proportions.o ratelimit.o \
-	 is_single_threaded.o plist.o decompress.o kobject_uevent.o \
-	 earlycpio.o seq_buf.o siphash.o dec_and_lock.o \
-	 nmi_backtrace.o win_minmax.o memcat_p.o \
-	 buildid.o objpool.o iomem_copy.o sys_info.o
+	 rbtree.o radix-tree.o xarray.o timerqueue.o \
+	 maple_tree.o idr.o extable.o \
+	 kobject_uevent.o \
+	 seq_buf.o siphash.o dec_and_lock.o iomem_copy.o \
 
+lib-$(CONFIG_KERNEL) +=  \
+	 irq_regs.o argv_split.o \
+	 flex_proportions.o ratelimit.o \
+	 is_single_threaded.o plist.o decompress.o \
+	 earlycpio.o \
+	 nmi_backtrace.o win_minmax.o memcat_p.o \
+	 buildid.o objpool.o sys_info.o
+
+ifdef CONFIG_KERNEL
 lib-$(CONFIG_UNION_FIND) += union_find.o
 lib-$(CONFIG_PRINTK) += dump_stack.o
 lib-$(CONFIG_SMP) += cpumask.o
 lib-$(CONFIG_MIN_HEAP) += min_heap.o
+endif
 
 lib-y	+= kobject.o klist.o
 obj-y	+= lockref.o
 
 CONTEXT_ANALYSIS_rhashtable.o := y
 
-obj-y += bcd.o sort.o parser.o debug_locks.o random32.o \
-	 bust_spinlocks.o kasprintf.o bitmap.o scatterlist.o \
-	 list_sort.o uuid.o iov_iter.o clz_ctz.o \
-	 bsearch.o find_bit.o llist.o lwq.o memweight.o kfifo.o \
-	 percpu-refcount.o rhashtable.o base64.o \
-	 once.o refcount.o rcuref.o usercopy.o errseq.o bucket_locks.o \
-	 generic-radix-tree.o bitmap-str.o
+obj-y += sort.o random32.o \
+	 kasprintf.o bitmap.o scatterlist.o \
+	 list_sort.o uuid.o iov_iter.o \
+	 bsearch.o find_bit.o llist.o kfifo.o \
+	 rhashtable.o \
+	 once.o refcount.o rcuref.o \
+	 bitmap-str.o
+
+obj-$(CONFIG_KERNEL) += bcd.o parser.o debug_locks.o \
+	 bust_spinlocks.o \
+	 clz_ctz.o \
+	 lwq.o memweight.o \
+	 percpu-refcount.o base64.o \
+	 usercopy.o errseq.o bucket_locks.o \
+	 generic-radix-tree.o
+
 obj-y += string_helpers.o
 obj-y += hexdump.o
 obj-$(CONFIG_TEST_HEXDUMP) += test_hexdump.o
@@ -110,7 +126,7 @@ test_fpu-y := test_fpu_glue.o test_fpu_impl.o
 CFLAGS_test_fpu_impl.o += $(CC_FLAGS_FPU)
 CFLAGS_REMOVE_test_fpu_impl.o += $(CC_FLAGS_NO_FPU)
 
-obj-y += kunit/
+obj-$(CONFIG_KERNEL) += kunit/
 
 ifeq ($(CONFIG_DEBUG_KOBJECT),y)
 CFLAGS_kobject.o += -DDEBUG
@@ -120,7 +136,8 @@ endif
 obj-$(CONFIG_DEBUG_INFO_REDUCED) += debug_info.o
 CFLAGS_debug_info.o += $(call cc-option, -femit-struct-debug-detailed=any)
 
-obj-y += math/ crc/ crypto/ tests/ vdso/
+obj-y += math/ crypto/ crc/
+obj-$(CONFIG_KERNEL) += tests/ vdso/
 
 obj-$(CONFIG_GENERIC_IOMAP) += iomap.o
 obj-$(CONFIG_HAS_IOMEM) += iomap_copy.o devres.o
@@ -129,7 +146,7 @@ obj-$(CONFIG_DEBUG_LOCKING_API_SELFTESTS) += locking-selftest.o
 
 obj-$(CONFIG_GENERIC_CPU_CACHE_MAINTENANCE) += cache_maint.o
 
-lib-y += logic_pio.o
+lib-$(CONFIG_KERNEL) += logic_pio.o
 
 lib-$(CONFIG_INDIRECT_IOMEM) += logic_iomem.o
 
@@ -313,7 +330,7 @@ obj-$(CONFIG_SBITMAP) += sbitmap.o
 
 obj-$(CONFIG_PARMAN) += parman.o
 
-obj-y += group_cpus.o
+obj-$(CONFIG_KERNEL) += group_cpus.o
 
 # GCC library routines
 obj-$(CONFIG_GENERIC_LIB_ASHLDI3) += ashldi3.o
