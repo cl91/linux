@@ -2,7 +2,7 @@
 config DRM_NOUVEAU
 	tristate "Nouveau (NVIDIA) cards"
 	depends on DRM && PCI
-	select IOMMU_API
+	select IOMMU_API if KERNEL
 	select FW_LOADER
 	select FW_CACHE if PM_SLEEP
 	select DRM_CLIENT_SELECTION
