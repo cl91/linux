@@ -22,4 +22,10 @@ void drm_log_register(struct drm_device *dev);
 static inline void drm_log_register(struct drm_device *dev) {}
 #endif
 
+#ifdef CONFIG_DRM_CLIENT_NTOS
+void drm_ntos_register(struct drm_device *dev);
+#else
+static inline void drm_ntos_register(struct drm_device *dev) {}
+#endif
+
 #endif
