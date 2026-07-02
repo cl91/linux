@@ -707,6 +707,14 @@ struct device_link {
 
 #define kobj_to_dev(__kobj)	container_of_const(__kobj, struct device, kobj)
 
+#define safe_kobj_to_dev(kobj)						\
+	_Generic(kobj,							\
+		 const struct kobject *: __safe_kobj_to_dev(kobj),	\
+		 struct kobject *: ((struct device *)__safe_kobj_to_dev(kobj)), \
+		 default: (*(struct __safe_kobj_to_dev_invalid_type *)0))
+
+const struct device *__safe_kobj_to_dev(const struct kobject *kobj);
+
 int __device_set_driver_override(struct device *dev, const char *s, size_t len);
 
 /**

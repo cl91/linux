@@ -2595,6 +2595,20 @@ static const struct kobj_type device_ktype = {
 	.get_ownership	= device_get_ownership,
 };
 
+/*
+ * Returns the device struct if the given kobject is one. Otherwise, return NULL.
+ */
+const struct device *__safe_kobj_to_dev(const struct kobject *kobj)
+{
+	if (!kobj)
+		return NULL;
+
+	/* Check if this kobject is actually a device */
+	if (!kobj->ktype || kobj->ktype != &device_ktype)
+		return NULL;
+
+	return kobj_to_dev(kobj);
+}
 
 static int dev_uevent_filter(const struct kobject *kobj)
 {
