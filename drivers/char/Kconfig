@@ -5,6 +5,25 @@
 
 menu "Character devices"
 
+config MISC_CHARDEV
+	tristate "Enable miscellaneous character devices"
+	default y if KERNEL
+	default m if !KERNEL
+	help
+	  Say Y here to enable drivers for /dev/zero, /dev/null, and other
+	  miscellaneous memory character devices. You should always say 'Y'
+	  unless you will be running the Linux kernel in a hosted environment.
+
+config DEVRANDOM
+	bool "Enable /dev/random and /dev/urandom"
+	depends on MISC_CHARDEV
+	default y if KERNEL
+	default n if !KERNEL
+	help
+	  Say Y here to enable drivers for /dev/random and /dev/urandom. You
+	  should always say 'Y' unless you will be running the Linux kernel
+	  in a hosted environment.
+
 source "drivers/tty/Kconfig"
 
 config TTY_PRINTK
@@ -316,7 +335,7 @@ config NVRAM
 
 config DEVPORT
 	bool "/dev/port character device"
-	depends on HAS_IOPORT
+	depends on HAS_IOPORT && KERNEL
 	default y
 	help
 	  Say Y here if you want to support the /dev/port device. The /dev/port

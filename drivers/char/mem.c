@@ -31,6 +31,9 @@
 #include <linux/uaccess.h>
 #include <linux/security.h>
 
+MODULE_LICENSE("GPL");
+MODULE_DESCRIPTION("Basic memory character devices (/dev/null, etc)");
+
 #define DEVMEM_MINOR	1
 #define DEVPORT_MINOR	4
 
@@ -436,6 +439,7 @@ static ssize_t write_iter_null(struct kiocb *iocb, struct iov_iter *from)
 	return count;
 }
 
+#ifdef CONFIG_KERNEL
 static int pipe_to_null(struct pipe_inode_info *info, struct pipe_buffer *buf,
 			struct splice_desc *sd)
 {
@@ -447,6 +451,7 @@ static ssize_t splice_write_null(struct pipe_inode_info *pipe, struct file *out,
 {
 	return splice_from_pipe(pipe, out, ppos, len, flags, pipe_to_null);
 }
+#endif	/* CONFIG_KERNEL */
 
 static int uring_cmd_null(struct io_uring_cmd *ioucmd, unsigned int issue_flags)
 {
@@ -663,7 +668,9 @@ static const struct file_operations null_fops = {
 	.write		= write_null,
 	.read_iter	= read_iter_null,
 	.write_iter	= write_iter_null,
+#ifdef CONFIG_KERNEL
 	.splice_write	= splice_write_null,
+#endif
 	.uring_cmd	= uring_cmd_null,
 };
 
@@ -682,8 +689,10 @@ static const struct file_operations zero_fops = {
 	.read_iter	= read_iter_zero,
 	.read		= read_zero,
 	.write_iter	= write_iter_zero,
+#ifdef CONFIG_KERNEL
 	.splice_read	= copy_splice_read,
 	.splice_write	= splice_write_zero,
+#endif
 	.mmap_prepare	= mmap_zero_prepare,
 	.get_unmapped_area = get_unmapped_area_zero,
 #ifndef CONFIG_MMU
@@ -695,7 +704,9 @@ static const struct file_operations full_fops = {
 	.llseek		= full_lseek,
 	.read_iter	= read_iter_zero,
 	.write		= write_full,
+#ifdef CONFIG_KERNEL
 	.splice_read	= copy_splice_read,
+#endif
 };
 
 static const struct memdev {
@@ -713,9 +724,11 @@ static const struct memdev {
 #endif
 	[5] = { "zero", &zero_fops, FMODE_NOWAIT, 0666 },
 	[7] = { "full", &full_fops, 0, 0666 },
+#ifdef CONFIG_DEVRANDOM
 	[8] = { "random", &random_fops, FMODE_NOWAIT, 0666 },
 	[9] = { "urandom", &urandom_fops, FMODE_NOWAIT, 0666 },
-#ifdef CONFIG_PRINTK
+#endif
+#if defined(CONFIG_KERNEL) && defined(CONFIG_PRINTK)
 	[11] = { "kmsg", &kmsg_fops, 0, 0644 },
 #endif
 };
@@ -788,4 +801,8 @@ static int __init chr_dev_init(void)
 	return tty_init();
 }
 
+#ifdef CONFIG_KERNEL
 fs_initcall(chr_dev_init);
+#else
+module_init(chr_dev_init);
+#endif
