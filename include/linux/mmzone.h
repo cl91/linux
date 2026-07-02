@@ -1901,6 +1901,7 @@ static inline unsigned long section_nr_to_pfn(unsigned long sec)
 #define SUBSECTION_ALIGN_UP(pfn) ALIGN((pfn), PAGES_PER_SUBSECTION)
 #define SUBSECTION_ALIGN_DOWN(pfn) ((pfn) & PAGE_SUBSECTION_MASK)
 
+#ifdef CONFIG_KERNEL
 struct mem_section_usage {
 	struct rcu_head rcu;
 #ifdef CONFIG_SPARSEMEM_VMEMMAP
@@ -1909,6 +1910,7 @@ struct mem_section_usage {
 	/* See declaration of similar field in struct zone */
 	unsigned long pageblock_flags[0];
 };
+#endif
 
 void subsection_map_init(unsigned long pfn, unsigned long nr_pages);
 
@@ -1929,7 +1931,11 @@ struct mem_section {
 	 */
 	unsigned long section_mem_map;
 
+#ifdef CONFIG_KERNEL
 	struct mem_section_usage *usage;
+#else
+	void *usage;
+#endif
 #ifdef CONFIG_PAGE_EXTENSION
 	/*
 	 * If SPARSEMEM, pgdat doesn't have page_ext pointer. We use
@@ -1960,10 +1966,12 @@ extern struct mem_section **mem_section;
 extern struct mem_section mem_section[NR_SECTION_ROOTS][SECTIONS_PER_ROOT];
 #endif
 
+#ifdef CONFIG_KERNEL
 static inline unsigned long *section_to_usemap(struct mem_section *ms)
 {
 	return ms->usage->pageblock_flags;
 }
+#endif
 
 static inline struct mem_section *__nr_to_section(unsigned long nr)
 {
