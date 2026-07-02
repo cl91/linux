@@ -9,6 +9,16 @@
 #
 source "arch/$(SRCARCH)/Kconfig"
 
+config KERNEL
+	bool
+	default y
+	select MISC_CHARDEV
+	select DEVRANDOM
+	help
+	  If you say N here, the core kernel components, including the scheduler, mm,
+	  and vfs will not be built. This is useful if you are running the Linux kernel
+	  in a hosted environment.
+
 config ARCH_CONFIGURES_CPU_MITIGATIONS
 	bool
 

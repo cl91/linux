@@ -34,6 +34,7 @@ arch/$(SRCARCH)/kernel/asm-offsets.s: $(timeconst-file) $(bounds-file)
 $(offsets-file): arch/$(SRCARCH)/kernel/asm-offsets.s FORCE
 	$(call filechk,offsets,__ASM_OFFSETS_H__)
 
+ifdef CONFIG_KERNEL
 # Generate rq-offsets.h
 
 rq-offsets-file := include/generated/rq-offsets.h
@@ -53,6 +54,7 @@ quiet_cmd_syscalls = CALL    $<
 PHONY += missing-syscalls
 missing-syscalls: scripts/checksyscalls.sh $(rq-offsets-file)
 	$(call cmd,syscalls)
+endif
 
 # Check the manual modification of atomic headers
 
@@ -81,23 +83,27 @@ $(atomic-checks): $(obj)/.checked-%: include/linux/atomic/%  FORCE
 # A phony target that depends on all the preparation targets
 
 PHONY += prepare
-prepare: $(offsets-file) missing-syscalls $(atomic-checks)
+prepare: $(offsets-file) $(atomic-checks)
 	@:
+ifdef CONFIG_KERNEL
+prepare: missing-syscalls
+	@:
+endif
 
 # Ordinary directory descending
 # ---------------------------------------------------------------------------
 
-obj-y			+= init/
-obj-y			+= usr/
+obj-$(CONFIG_KERNEL)	+= init/
+obj-$(CONFIG_KERNEL)	+= usr/
 obj-y			+= arch/$(SRCARCH)/
 obj-y			+= $(ARCH_CORE)
-obj-y			+= kernel/
-obj-y			+= certs/
-obj-y			+= mm/
-obj-y			+= fs/
-obj-y			+= ipc/
-obj-y			+= security/
-obj-y			+= crypto/
+obj-$(CONFIG_KERNEL)	+= kernel/
+obj-$(CONFIG_KERNEL)	+= certs/
+obj-$(CONFIG_KERNEL)	+= mm/
+obj-$(CONFIG_KERNEL)	+= fs/
+obj-$(CONFIG_KERNEL)	+= ipc/
+obj-$(CONFIG_KERNEL)	+= security/
+obj-$(CONFIG_KERNEL)	+= crypto/
 obj-$(CONFIG_BLOCK)	+= block/
 obj-$(CONFIG_IO_URING)	+= io_uring/
 obj-$(CONFIG_RUST)	+= rust/
@@ -106,6 +112,6 @@ obj-y			+= drivers/
 obj-y			+= sound/
 obj-$(CONFIG_SAMPLES)	+= samples/
 obj-$(CONFIG_NET)	+= net/
-obj-y			+= virt/
+obj-$(CONFIG_KERNEL)	+= virt/
 obj-y			+= $(ARCH_DRIVERS)
 obj-$(CONFIG_DRM_HEADER_TEST)	+= include/
