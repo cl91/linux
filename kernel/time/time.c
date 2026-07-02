@@ -627,18 +627,18 @@ EXPORT_SYMBOL(timespec64_to_jiffies);
 
 /**
  * jiffies_to_timespec64 - convert jiffies value to &struct timespec64
- * @jiffies: jiffies value
+ * @jif: jiffies value
  * @value: pointer to &struct timespec64
  */
 void
-jiffies_to_timespec64(const unsigned long jiffies, struct timespec64 *value)
+jiffies_to_timespec64(const unsigned long jif, struct timespec64 *value)
 {
 	/*
 	 * Convert jiffies to nanoseconds and separate with
 	 * one divide.
 	 */
 	u32 rem;
-	value->tv_sec = div_u64_rem((u64)jiffies * TICK_NSEC,
+	value->tv_sec = div_u64_rem((u64)jif * TICK_NSEC,
 				    NSEC_PER_SEC, &rem);
 	value->tv_nsec = rem;
 }

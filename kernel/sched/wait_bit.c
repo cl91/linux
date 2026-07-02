@@ -257,7 +257,11 @@ EXPORT_SYMBOL(bit_wait_io);
 
 __sched int bit_wait_timeout(struct wait_bit_key *word, int mode)
 {
+#ifdef CONFIG_KERNEL
 	unsigned long now = READ_ONCE(jiffies);
+#else
+	unsigned long now = jiffies;
+#endif
 
 	if (time_after_eq(now, word->timeout))
 		return -EAGAIN;

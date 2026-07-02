@@ -71,6 +71,8 @@ extern void register_refined_jiffies(long clock_tick_rate);
 #define __jiffy_arch_data
 #endif
 
+#ifdef CONFIG_KERNEL
+
 /*
  * The 64-bit value is not atomic on 32-bit systems - you MUST NOT read it
  * without sampling the sequence number in jiffies_lock.
@@ -101,6 +103,14 @@ static inline u64 get_jiffies_64(void)
 	return (u64)jiffies;
 }
 #endif
+
+#else
+
+u64 get_jiffies_64(void);
+#define jiffies_64  (get_jiffies_64())
+#define jiffies	    ((unsigned long)get_jiffies_64())
+
+#endif	/* CONFIG_KERNEL */
 
 /**
  * DOC: General information about time_* inlines
@@ -625,7 +635,7 @@ static __always_inline unsigned long usecs_to_jiffies(const unsigned int u)
 }
 
 extern unsigned long timespec64_to_jiffies(const struct timespec64 *value);
-extern void jiffies_to_timespec64(const unsigned long jiffies,
+extern void jiffies_to_timespec64(const unsigned long jif,
 				  struct timespec64 *value);
 extern clock_t jiffies_to_clock_t(unsigned long x);
 
