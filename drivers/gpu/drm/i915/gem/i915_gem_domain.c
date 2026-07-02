@@ -16,6 +16,10 @@
 #include "i915_gem_object_frontbuffer.h"
 #include "i915_vma.h"
 
+#ifdef CONFIG_NTOS
+#define static_cpu_has(x) true
+#endif
+
 static bool gpu_write_needs_clflush(struct drm_i915_gem_object *obj)
 {
 	struct drm_i915_private *i915 = to_i915(obj->base.dev);
