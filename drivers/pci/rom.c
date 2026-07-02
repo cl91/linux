@@ -10,6 +10,8 @@
 #include <linux/pci.h>
 #include <linux/slab.h>
 
+#ifdef CONFIG_KERNEL
+
 #include "pci.h"
 
 /**
@@ -68,6 +70,8 @@ void pci_disable_rom(struct pci_dev *pdev)
 	pci_write_config_dword(pdev, pdev->rom_base_reg, rom_addr);
 }
 EXPORT_SYMBOL_GPL(pci_disable_rom);
+
+#endif	/* CONFIG_KERNEL */
 
 /**
  * pci_get_rom_size - obtain the actual size of the ROM image
@@ -139,9 +143,11 @@ void __iomem *pci_map_rom(struct pci_dev *pdev, size_t *size)
 	loff_t start;
 	void __iomem *rom;
 
+#ifdef CONFIG_KERNEL
 	/* assign the ROM an address if it doesn't have one */
 	if (res->parent == NULL && pci_assign_resource(pdev, PCI_ROM_RESOURCE))
 		return NULL;
+#endif
 
 	start = pci_resource_start(pdev, PCI_ROM_RESOURCE);
 	*size = pci_resource_len(pdev, PCI_ROM_RESOURCE);

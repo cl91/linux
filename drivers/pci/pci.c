@@ -47,6 +47,8 @@ int isa_dma_bridge_buggy;
 EXPORT_SYMBOL(isa_dma_bridge_buggy);
 #endif
 
+#ifdef CONFIG_KERNEL
+
 int pci_pci_problems;
 EXPORT_SYMBOL(pci_pci_problems);
 
@@ -199,6 +201,8 @@ unsigned char pci_bus_max_busnr(struct pci_bus *bus)
 }
 EXPORT_SYMBOL_GPL(pci_bus_max_busnr);
 
+#endif	/* CONFIG_KERNEL */
+
 /**
  * pci_status_get_and_clear_errors - return and clear error bits in PCI_STATUS
  * @pdev: the PCI device
@@ -256,6 +260,8 @@ void __iomem *pci_ioremap_wc_bar(struct pci_dev *pdev, int bar)
 }
 EXPORT_SYMBOL_GPL(pci_ioremap_wc_bar);
 #endif
+
+#ifdef CONFIG_KERNEL
 
 /**
  * pci_dev_str_match_path - test if a path string matches a device
@@ -532,6 +538,8 @@ u16 pci_find_next_ext_capability(struct pci_dev *dev, u16 start, int cap)
 }
 EXPORT_SYMBOL_GPL(pci_find_next_ext_capability);
 
+#endif	/* CONFIG_KERNEL */
+
 /**
  * pci_find_ext_capability - Find an extended capability
  * @dev: PCI device to query
@@ -585,6 +593,8 @@ u64 pci_get_dsn(struct pci_dev *dev)
 	return dsn;
 }
 EXPORT_SYMBOL_GPL(pci_get_dsn);
+
+#ifdef CONFIG_KERNEL
 
 static u8 __pci_find_next_ht_cap(struct pci_dev *dev, u8 pos, int ht_cap)
 {
@@ -656,6 +666,8 @@ u8 pci_find_ht_capability(struct pci_dev *dev, int ht_cap)
 	return pos;
 }
 EXPORT_SYMBOL_GPL(pci_find_ht_capability);
+
+#endif	/* CONFIG_KERNEL */
 
 /**
  * pci_find_vsec_capability - Find a vendor-specific extended capability
@@ -874,6 +886,8 @@ int pci_wait_for_pending(struct pci_dev *dev, int pos, u16 mask)
 
 	return 0;
 }
+
+#ifdef CONFIG_KERNEL
 
 static int pci_acs_enable;
 
@@ -3123,6 +3137,8 @@ void pci_pm_power_up_and_verify_state(struct pci_dev *pci_dev)
 	pci_update_current_state(pci_dev, PCI_D0);
 }
 
+#endif	/* CONFIG_KERNEL */
+
 /**
  * pci_pm_init - Initialize PM functions of given PCI device
  * @dev: PCI device to handle.
@@ -3202,6 +3218,8 @@ poweron:
 	 */
 	pm_runtime_set_active(&dev->dev);
 }
+
+#ifdef CONFIG_KERNEL
 
 static unsigned long pci_ea_flags(struct pci_dev *dev, u8 prop)
 {
@@ -4077,6 +4095,8 @@ void pci_unmap_iospace(struct resource *res)
 }
 EXPORT_SYMBOL(pci_unmap_iospace);
 
+#endif	/* CONFIG_KERNEL */
+
 static void __pci_set_master(struct pci_dev *dev, bool enable)
 {
 	u16 old_cmd, cmd;
@@ -4156,6 +4176,8 @@ void pci_clear_master(struct pci_dev *dev)
 	__pci_set_master(dev, false);
 }
 EXPORT_SYMBOL(pci_clear_master);
+
+#ifdef CONFIG_KERNEL
 
 /**
  * pci_set_cacheline_size - ensure the CACHE_LINE_SIZE register is programmed
@@ -4307,6 +4329,8 @@ void pci_intx(struct pci_dev *pdev, int enable)
 }
 EXPORT_SYMBOL_GPL(pci_intx);
 
+#endif	/* CONFIG_KERNEL */
+
 /**
  * pci_wait_for_pending_transaction - wait for pending transaction
  * @dev: the PCI device to operate on
@@ -4322,6 +4346,8 @@ int pci_wait_for_pending_transaction(struct pci_dev *dev)
 				    PCI_EXP_DEVSTA_TRPND);
 }
 EXPORT_SYMBOL(pci_wait_for_pending_transaction);
+
+#ifdef CONFIG_KERNEL
 
 /**
  * pcie_flr - initiate a PCIe function level reset
@@ -5682,6 +5708,8 @@ int pci_reset_bus(struct pci_dev *pdev)
 }
 EXPORT_SYMBOL_GPL(pci_reset_bus);
 
+#endif	/* CONFIG_KERNEL */
+
 /**
  * pcix_get_max_mmrbc - get PCI-X maximum designed memory read byte count
  * @dev: PCI device to query
@@ -6132,6 +6160,8 @@ int pci_select_bars(struct pci_dev *dev, unsigned long flags)
 	return bars;
 }
 EXPORT_SYMBOL(pci_select_bars);
+
+#ifdef CONFIG_KERNEL
 
 /* Some architectures require additional programming to enable VGA */
 static arch_set_vga_state_t arch_set_vga_state;
@@ -6782,3 +6812,5 @@ static int __init pci_realloc_setup_params(void)
 	return 0;
 }
 pure_initcall(pci_realloc_setup_params);
+
+#endif	/* CONFIG_KERNEL */

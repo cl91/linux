@@ -30,6 +30,8 @@
 
 #include "internal.h"
 
+#ifdef CONFIG_KERNEL
+
 int simple_getattr(struct mnt_idmap *idmap, const struct path *path,
 		   struct kstat *stat, u32 request_mask,
 		   unsigned int query_flags)
@@ -40,6 +42,8 @@ int simple_getattr(struct mnt_idmap *idmap, const struct path *path,
 	return 0;
 }
 EXPORT_SYMBOL(simple_getattr);
+
+#endif	/* CONFIG_KERNEL */
 
 int simple_statfs(struct dentry *dentry, struct kstatfs *buf)
 {
@@ -62,6 +66,8 @@ int always_delete_dentry(const struct dentry *dentry)
 	return 1;
 }
 EXPORT_SYMBOL(always_delete_dentry);
+
+#ifdef CONFIG_KERNEL
 
 /*
  * Lookup the data. This is trivial - if the dentry didn't already
@@ -712,6 +718,8 @@ static int pseudo_fs_get_tree(struct fs_context *fc)
 	return get_tree_nodev(fc, pseudo_fs_fill_super);
 }
 
+#endif	/* CONFIG_KERNEL */
+
 static void pseudo_fs_free(struct fs_context *fc)
 {
 	kfree(fc->fs_private);
@@ -719,7 +727,9 @@ static void pseudo_fs_free(struct fs_context *fc)
 
 static const struct fs_context_operations pseudo_fs_context_ops = {
 	.free		= pseudo_fs_free,
+#ifdef CONFIG_KERNEL
 	.get_tree	= pseudo_fs_get_tree,
+#endif
 };
 
 /*
@@ -750,6 +760,8 @@ int simple_open(struct inode *inode, struct file *file)
 	return 0;
 }
 EXPORT_SYMBOL(simple_open);
+
+#ifdef CONFIG_KERNEL
 
 int simple_link(struct dentry *old_dentry, struct inode *dir, struct dentry *dentry)
 {
@@ -1092,6 +1104,8 @@ int simple_fill_super(struct super_block *s, unsigned long magic,
 }
 EXPORT_SYMBOL(simple_fill_super);
 
+#endif	/* CONFIG_KERNEL */
+
 static DEFINE_SPINLOCK(pin_fs_lock);
 
 int simple_pin_fs(struct file_system_type *type, struct vfsmount **mount, int *count)
@@ -1229,6 +1243,8 @@ ssize_t memory_read_from_buffer(void *to, size_t count, loff_t *ppos,
 }
 EXPORT_SYMBOL(memory_read_from_buffer);
 
+#ifdef CONFIG_KERNEL
+
 /*
  * Transaction based IO.
  * The file expects a single write which triggers the transaction, and then
@@ -1299,6 +1315,8 @@ int simple_transaction_release(struct inode *inode, struct file *file)
 	return 0;
 }
 EXPORT_SYMBOL(simple_transaction_release);
+
+#endif	/* CONFIG_KERNEL */
 
 /* Simple attribute files */
 
@@ -1431,6 +1449,8 @@ ssize_t simple_attr_write_signed(struct file *file, const char __user *buf,
 	return simple_attr_write_xsigned(file, buf, len, ppos, true);
 }
 EXPORT_SYMBOL_GPL(simple_attr_write_signed);
+
+#ifdef CONFIG_KERNEL
 
 /**
  * generic_encode_ino32_fh - generic export_operations->encode_fh function
@@ -1666,6 +1686,8 @@ void kfree_link(void *p)
 }
 EXPORT_SYMBOL(kfree_link);
 
+#endif	/* CONFIG_KERNEL */
+
 struct inode *alloc_anon_inode(struct super_block *s)
 {
 	static const struct address_space_operations anon_aops = {
@@ -1698,6 +1720,8 @@ struct inode *alloc_anon_inode(struct super_block *s)
 	return inode;
 }
 EXPORT_SYMBOL(alloc_anon_inode);
+
+#ifdef CONFIG_KERNEL
 
 /**
  * simple_get_link - generic helper to get the target of "fast" symlinks
@@ -2121,6 +2145,8 @@ ssize_t direct_write_fallback(struct kiocb *iocb, struct iov_iter *iter,
 }
 EXPORT_SYMBOL_GPL(direct_write_fallback);
 
+#endif	/* CONFIG_KERNEL */
+
 /**
  * simple_inode_init_ts - initialize the timestamps for a new inode
  * @inode: inode to be initialized
@@ -2137,6 +2163,8 @@ struct timespec64 simple_inode_init_ts(struct inode *inode)
 	return ts;
 }
 EXPORT_SYMBOL(simple_inode_init_ts);
+
+#ifdef CONFIG_KERNEL
 
 struct dentry *stashed_dentry_get(struct dentry **stashed)
 {
@@ -2322,3 +2350,5 @@ void simple_done_creating(struct dentry *child)
 	dput(child);
 }
 EXPORT_SYMBOL(simple_done_creating);
+
+#endif	/* CONFIG_KERNEL */

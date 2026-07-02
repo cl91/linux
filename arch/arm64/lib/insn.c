@@ -12,10 +12,16 @@
 #include <linux/sizes.h>
 #include <linux/types.h>
 
+#ifndef CONFIG_NTOS
 #include <asm/debug-monitors.h>
 #include <asm/errno.h>
 #include <asm/insn.h>
 #include <asm/kprobes.h>
+#else
+#include <asm/insn.h>
+#include <vdso/align.h>
+#define __kprobes
+#endif
 
 #define AARCH64_INSN_SF_BIT	BIT(31)
 #define AARCH64_INSN_N_BIT	BIT(22)

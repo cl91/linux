@@ -51,6 +51,8 @@
 #include <asm/timex.h>
 #include <asm/io.h>
 
+#ifdef CONFIG_KERNEL
+
 #include "tick-internal.h"
 #include "timer_migration.h"
 
@@ -345,6 +347,8 @@ static inline bool is_timers_nohz_active(void)
 static inline bool is_timers_nohz_active(void) { return false; }
 #endif /* NO_HZ_COMMON */
 
+#endif	/* CONFIG_KERNEL */
+
 static unsigned long round_jiffies_common(unsigned long j, int cpu,
 		bool force_up)
 {
@@ -505,6 +509,7 @@ unsigned long round_jiffies_up_relative(unsigned long j)
 }
 EXPORT_SYMBOL_GPL(round_jiffies_up_relative);
 
+#ifdef CONFIG_KERNEL
 
 static inline unsigned int timer_get_idx(struct timer_list *timer)
 {
@@ -2577,3 +2582,5 @@ void __init timers_init(void)
 	posix_cputimers_init_work();
 	open_softirq(TIMER_SOFTIRQ, run_timer_softirq);
 }
+
+#endif	/* CONFIG_KERNEL */

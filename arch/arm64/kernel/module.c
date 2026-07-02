@@ -24,6 +24,10 @@
 #include <asm/scs.h>
 #include <asm/sections.h>
 #include <asm/text-patching.h>
+#ifdef CONFIG_NTOS
+#include "../include/asm/elf.h"
+#include "../include/asm/module.h"
+#endif
 
 enum aarch64_reloc_op {
 	RELOC_OP_NONE,
@@ -444,6 +448,8 @@ overflow:
 	return -ENOEXEC;
 }
 
+#ifndef CONFIG_NTOS
+
 static inline void __init_plt(struct plt_entry *plt, unsigned long addr)
 {
 	*plt = get_plt_entry(addr, plt);
@@ -517,3 +523,5 @@ int module_finalize(const Elf_Ehdr *hdr,
 
 	return module_init_ftrace_plt(hdr, sechdrs, me);
 }
+
+#endif	/* !CONFIG_NTOS */

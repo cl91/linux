@@ -14,6 +14,8 @@
 
 DEFINE_RAW_SPINLOCK(pci_lock);
 
+#ifdef CONFIG_KERNEL
+
 /*
  * Wrappers for all PCI configuration access functions.  They just check
  * alignment, do locking and call the low-level functions pointed to
@@ -346,6 +348,8 @@ void pci_cfg_access_unlock(struct pci_dev *dev)
 }
 EXPORT_SYMBOL_GPL(pci_cfg_access_unlock);
 
+#endif
+
 static inline int pcie_cap_version(const struct pci_dev *dev)
 {
 	return pcie_caps_reg(dev) & PCI_EXP_FLAGS_VERS;
@@ -557,6 +561,8 @@ int pcie_capability_clear_and_set_dword(struct pci_dev *dev, int pos,
 }
 EXPORT_SYMBOL(pcie_capability_clear_and_set_dword);
 
+#ifdef CONFIG_KERNEL
+
 int pci_read_config_byte(const struct pci_dev *dev, int where, u8 *val)
 {
 	if (pci_dev_is_disconnected(dev)) {
@@ -612,6 +618,8 @@ int pci_write_config_dword(const struct pci_dev *dev, int where,
 	return pci_bus_write_config_dword(dev->bus, dev->devfn, where, val);
 }
 EXPORT_SYMBOL(pci_write_config_dword);
+
+#endif	/* CONFIG_KERNEL */
 
 void pci_clear_and_set_config_dword(const struct pci_dev *dev, int pos,
 				    u32 clear, u32 set)

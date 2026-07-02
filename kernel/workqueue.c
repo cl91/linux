@@ -1391,7 +1391,7 @@ restart:
 	goto restart;
 }
 
-#else	/* CONFIG_WQ_CPU_INTENSIVE_REPORT */
+#elif defined(CONFIG_KERNEL)	/* CONFIG_WQ_CPU_INTENSIVE_REPORT */
 static void wq_cpu_intensive_report(work_func_t func) {}
 #endif	/* CONFIG_WQ_CPU_INTENSIVE_REPORT */
 
@@ -1419,11 +1419,13 @@ void wq_worker_running(struct task_struct *task)
 		worker->pool->nr_running++;
 	preempt_enable();
 
+#ifdef CONFIG_KERNEL
 	/*
 	 * CPU intensive auto-detection cares about how long a work item hogged
 	 * CPU without sleeping. Reset the starting timestamp on wakeup.
 	 */
 	worker->current_at = worker->task->se.sum_exec_runtime;
+#endif
 
 	WRITE_ONCE(worker->sleeping, 0);
 }
@@ -1474,6 +1476,7 @@ void wq_worker_sleeping(struct task_struct *task)
 	raw_spin_unlock_irq(&pool->lock);
 }
 
+#ifdef CONFIG_KERNEL
 /**
  * wq_worker_tick - a scheduler tick occurred while a kworker is running
  * @task: task currently running
@@ -1523,6 +1526,7 @@ void wq_worker_tick(struct task_struct *task)
 
 	raw_spin_unlock(&pool->lock);
 }
+#endif	/* CONFIG_KERNEL */
 
 /**
  * wq_worker_last_func - retrieve worker's last work function
@@ -3214,8 +3218,10 @@ __acquires(&pool->lock)
 	worker->current_work = work;
 	worker->current_func = work->func;
 	worker->current_pwq = pwq;
+#ifdef CONFIG_KERNEL
 	if (worker->task)
 		worker->current_at = worker->task->se.sum_exec_runtime;
+#endif
 	worker->current_start = jiffies;
 	work_data = *work_data_bits(work);
 	worker->current_color = get_work_color(work_data);

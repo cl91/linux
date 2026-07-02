@@ -168,6 +168,8 @@ int pci_rebar_get_max_size(struct pci_dev *pdev, int bar)
 }
 EXPORT_SYMBOL_GPL(pci_rebar_get_max_size);
 
+#ifdef CONFIG_KERNEL
+
 /**
  * pci_rebar_get_current_size - get the current size of a Resizable BAR
  * @pdev: PCI device
@@ -310,3 +312,5 @@ int pci_resize_resource(struct pci_dev *dev, int resno, int size,
 	return pci_do_resource_release_and_resize(dev, resno, size, exclude_bars);
 }
 EXPORT_SYMBOL(pci_resize_resource);
+
+#endif	/* CONFIG_KERNEL */

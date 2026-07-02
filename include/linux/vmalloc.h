@@ -283,7 +283,7 @@ __init void vm_area_register_early(struct vm_struct *vm, size_t align);
 int register_vmap_purge_notifier(struct notifier_block *nb);
 int unregister_vmap_purge_notifier(struct notifier_block *nb);
 
-#ifdef CONFIG_MMU
+#if defined(CONFIG_MMU) || defined(CONFIG_NTOS)
 #define VMALLOC_TOTAL (VMALLOC_END - VMALLOC_START)
 
 unsigned long vmalloc_nr_pages(void);

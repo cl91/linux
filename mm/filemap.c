@@ -65,6 +65,8 @@
 
 #include "swap.h"
 
+#ifdef CONFIG_KERNEL
+
 /*
  * Shared mappings implemented 30.11.1994. It's not fully working yet,
  * though.
@@ -845,6 +847,8 @@ void replace_page_cache_folio(struct folio *old, struct folio *new)
 }
 EXPORT_SYMBOL_GPL(replace_page_cache_folio);
 
+#endif	/* CONFIG_KERNEL */
+
 noinline int __filemap_add_folio(struct address_space *mapping,
 		struct folio *folio, pgoff_t index, gfp_t gfp, void **shadowp)
 {
@@ -857,7 +861,9 @@ noinline int __filemap_add_folio(struct address_space *mapping,
 	VM_BUG_ON_FOLIO(folio_test_swapbacked(folio), folio);
 	VM_BUG_ON_FOLIO(folio_order(folio) < mapping_min_folio_order(mapping),
 			folio);
+#ifdef CONFIG_KERNEL
 	mapping_set_update(&xas, mapping);
+#endif
 
 	VM_BUG_ON_FOLIO(index & (folio_nr_pages(folio) - 1), folio);
 	huge = folio_test_hugetlb(folio);
@@ -968,6 +974,7 @@ int filemap_add_folio(struct address_space *mapping, struct folio *folio,
 		mem_cgroup_uncharge(folio);
 		__folio_clear_locked(folio);
 	} else {
+#ifdef CONFIG_KERNEL
 		/*
 		 * The folio might have been evicted from cache only
 		 * recently, in which case it should be activated like
@@ -984,10 +991,13 @@ int filemap_add_folio(struct address_space *mapping, struct folio *folio,
 			mod_node_page_state(folio_pgdat(folio),
 					    NR_KERNEL_FILE_PAGES,
 					    folio_nr_pages(folio));
+#endif
 	}
 	return ret;
 }
 EXPORT_SYMBOL_GPL(filemap_add_folio);
+
+#ifdef CONFIG_KERNEL
 
 #ifdef CONFIG_NUMA
 struct folio *filemap_alloc_folio_noprof(gfp_t gfp, unsigned int order,
@@ -1053,6 +1063,8 @@ void filemap_invalidate_unlock_two(struct address_space *mapping1,
 }
 EXPORT_SYMBOL(filemap_invalidate_unlock_two);
 
+#endif	/* CONFIG_KERNEL */
+
 /*
  * In order to wait for pages to become available there must be
  * waitqueues associated with pages. By using a hash table of
@@ -1092,7 +1104,9 @@ void __init pagecache_init(void)
 	for (i = 0; i < PAGE_WAIT_TABLE_SIZE; i++)
 		init_waitqueue_head(&folio_wait_table[i]);
 
+#ifdef CONFIG_KERNEL
 	page_writeback_init();
+#endif
 	register_sysctl_init("vm", filemap_sysctl_table);
 }
 
@@ -1600,6 +1614,8 @@ int folio_wait_private_2_killable(struct folio *folio)
 }
 EXPORT_SYMBOL(folio_wait_private_2_killable);
 
+#ifdef CONFIG_KERNEL
+
 static void filemap_end_dropbehind(struct folio *folio)
 {
 	struct address_space *mapping = folio->mapping;
@@ -1695,6 +1711,8 @@ void folio_end_writeback(struct folio *folio)
 }
 EXPORT_SYMBOL(folio_end_writeback);
 
+#endif	/* CONFIG_KERNEL */
+
 /**
  * __folio_lock - Get a lock on the folio, assuming we need to sleep to get it.
  * @folio: The folio to lock
@@ -1712,6 +1730,8 @@ int __folio_lock_killable(struct folio *folio)
 					EXCLUSIVE);
 }
 EXPORT_SYMBOL_GPL(__folio_lock_killable);
+
+#ifdef CONFIG_KERNEL
 
 static int __folio_lock_async(struct folio *folio, struct wait_page_queue *wait)
 {
@@ -1856,6 +1876,8 @@ pgoff_t page_cache_prev_miss(struct address_space *mapping,
 	return xas.xa_index;
 }
 EXPORT_SYMBOL(page_cache_prev_miss);
+
+#endif	/* CONFIG_KERNEL */
 
 /*
  * Lockless page cache protocol:
@@ -2056,6 +2078,8 @@ no_page:
 	return folio;
 }
 EXPORT_SYMBOL(__filemap_get_folio_mpol);
+
+#ifdef CONFIG_KERNEL
 
 static inline struct folio *find_get_entry(struct xa_state *xas, pgoff_t max,
 		xa_mark_t mark)
@@ -2423,6 +2447,8 @@ out:
 	return folio_batch_count(fbatch);
 }
 
+#endif	/* CONFIG_KERNEL */
+
 /*
  * CD/DVDs are error prone. When a medium error occurs, the driver may fail
  * a _large_ part of the i/o request. Imagine the worst scenario:
@@ -2442,6 +2468,8 @@ static void shrink_readahead_size_eio(struct file_ra_state *ra)
 {
 	ra->ra_pages /= 4;
 }
+
+#ifdef CONFIG_KERNEL
 
 /*
  * filemap_get_read_batch - Get a batch of folios for read
@@ -2488,6 +2516,8 @@ retry:
 	rcu_read_unlock();
 }
 
+#endif	/* CONFIG_KERNEL */
+
 static int filemap_read_folio(struct file *file, filler_t filler,
 		struct folio *folio)
 {
@@ -2513,6 +2543,8 @@ static int filemap_read_folio(struct file *file, filler_t filler,
 		shrink_readahead_size_eio(&file->f_ra);
 	return -EIO;
 }
+
+#ifdef CONFIG_KERNEL
 
 static bool filemap_range_uptodate(struct address_space *mapping,
 		loff_t pos, size_t count, struct folio *folio,
@@ -4055,6 +4087,8 @@ EXPORT_SYMBOL(generic_file_mmap_prepare);
 EXPORT_SYMBOL(generic_file_readonly_mmap);
 EXPORT_SYMBOL(generic_file_readonly_mmap_prepare);
 
+#endif	/* CONFIG_KERNEL */
+
 static struct folio *do_read_cache_folio(struct address_space *mapping,
 		pgoff_t index, filler_t filler, struct file *file, gfp_t gfp)
 {
@@ -4205,6 +4239,8 @@ struct page *read_cache_page_gfp(struct address_space *mapping,
 	return do_read_cache_page(mapping, index, NULL, NULL, gfp);
 }
 EXPORT_SYMBOL(read_cache_page_gfp);
+
+#ifdef CONFIG_KERNEL
 
 /*
  * Warn about a page cache invalidation failure during a direct I/O write.
@@ -4749,3 +4785,5 @@ SYSCALL_DEFINE4(cachestat, unsigned int, fd,
 	return 0;
 }
 #endif /* CONFIG_CACHESTAT_SYSCALL */
+
+#endif	/* CONFIG_KERNEL */

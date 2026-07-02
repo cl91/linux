@@ -2583,6 +2583,7 @@ struct net_device {
 				       __counted_by(priv_len);
 } ____cacheline_aligned;
 #define to_net_dev(d) container_of(d, struct net_device, dev)
+extern struct net_device *to_net_dev_safe(struct device *);
 
 /*
  * Driver should use this to assign devlink port instance to a netdevice

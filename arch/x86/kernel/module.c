@@ -21,10 +21,19 @@
 #include <linux/memory.h>
 #include <linux/stackprotector.h>
 
+#ifndef CONFIG_NTOS
 #include <asm/text-patching.h>
 #include <asm/page.h>
 #include <asm/setup.h>
 #include <asm/unwind.h>
+#else
+#include <asm/elf.h>
+#ifdef __i386__
+#define CONFIG_X86_32
+#elif defined(__x86_64__)
+#define CONFIG_X86_64
+#endif
+#endif
 
 #if 0
 #define DEBUGP(fmt, ...)				\
@@ -197,21 +206,27 @@ static int write_relocate_add(Elf64_Shdr *sechdrs,
 			      bool apply)
 {
 	int ret;
+#ifndef CONFIG_NTOS
 	bool early = me->state == MODULE_STATE_UNFORMED;
+#endif
 	void *(*write)(void *, const void *, size_t) = memcpy;
 
+#ifndef CONFIG_NTOS
 	if (!early) {
 		write = text_poke;
 		mutex_lock(&text_mutex);
 	}
+#endif
 
 	ret = __write_relocate_add(sechdrs, strtab, symindex, relsec, me,
 				   write, apply);
 
+#ifndef CONFIG_NTOS
 	if (!early) {
 		smp_text_poke_sync_each_cpu();
 		mutex_unlock(&text_mutex);
 	}
+#endif
 
 	return ret;
 }
@@ -238,6 +253,7 @@ void clear_relocate_add(Elf64_Shdr *sechdrs,
 
 #endif
 
+#ifndef CONFIG_NTOS
 int module_finalize(const Elf_Ehdr *hdr,
 		    const Elf_Shdr *sechdrs,
 		    struct module *me)
@@ -336,3 +352,4 @@ void module_arch_cleanup(struct module *mod)
 	alternatives_smp_module_del(mod);
 	its_free_mod(mod);
 }
+#endif

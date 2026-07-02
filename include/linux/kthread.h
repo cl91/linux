@@ -212,6 +212,13 @@ struct kthread_worker *kthread_create_worker_on_node(unsigned int flags,
 						     int node,
 						     const char namefmt[], ...);
 
+#ifndef CONFIG_KERNEL
+__printf(4, 0) struct task_struct *__kthread_create_on_node(int (*threadfn)(void *data),
+							    void *data, int node,
+							    const char namefmt[],
+							    va_list args);
+#endif
+
 #define kthread_create_worker(flags, namefmt, ...) \
 	kthread_create_worker_on_node(flags, NUMA_NO_NODE, namefmt, ## __VA_ARGS__);
 

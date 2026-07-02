@@ -6,6 +6,7 @@
  */
 
 struct super_block;
+struct files_struct;
 struct file_system_type;
 struct iomap;
 struct iomap_ops;
