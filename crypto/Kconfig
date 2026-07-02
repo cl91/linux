@@ -14,6 +14,7 @@ source "crypto/async_tx/Kconfig"
 # Cryptographic API Configuration
 #
 menuconfig CRYPTO
+	depends on KERNEL
 	tristate "Cryptographic API"
 	select CRYPTO_LIB_UTILS
 	help
