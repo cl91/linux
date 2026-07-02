@@ -4842,14 +4842,16 @@ int arch_lock_shadow_stack_status(struct task_struct *t, unsigned long status);
  * index to not overlap with that if set
  */
 #define PP_DMA_INDEX_BITS MIN(32, __ffs(POISON_POINTER_DELTA) - PP_DMA_INDEX_SHIFT)
-#else
+#elif defined(CONFIG_KERNEL)
 /* Use the lowest bit of PAGE_OFFSET if there's at least 8 bits available; see above */
 #define PP_DMA_INDEX_MIN_OFFSET (1 << (PP_DMA_INDEX_SHIFT + 8))
 #define PP_DMA_INDEX_BITS ((__builtin_constant_p(PAGE_OFFSET) && \
 			    PAGE_OFFSET >= PP_DMA_INDEX_MIN_OFFSET && \
 			    !(PAGE_OFFSET & (PP_DMA_INDEX_MIN_OFFSET - 1))) ? \
 			      MIN(32, __ffs(PAGE_OFFSET) - PP_DMA_INDEX_SHIFT) : 0)
-
+#else
+/* If we are running in a hosted environment, disable tracking of DMA mappings */
+#define PP_DMA_INDEX_BITS 0
 #endif
 
 #define PP_DMA_INDEX_MASK GENMASK(PP_DMA_INDEX_BITS + PP_DMA_INDEX_SHIFT - 1, \
