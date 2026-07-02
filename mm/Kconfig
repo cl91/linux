@@ -11,7 +11,7 @@ config ARCH_NO_SWAP
 
 menuconfig SWAP
 	bool "Support for paging of anonymous memory (swap)"
-	depends on MMU && BLOCK && !ARCH_NO_SWAP
+	depends on MMU && BLOCK && !ARCH_NO_SWAP && KERNEL
 	default y
 	help
 	  This option allows you to choose whether you want to have support
