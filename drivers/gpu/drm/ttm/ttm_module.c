@@ -68,7 +68,7 @@ pgprot_t ttm_prot_from_caching(enum ttm_caching caching, pgprot_t tmp)
 #if defined(__i386__) || defined(__x86_64__)
 	if (caching == ttm_write_combined)
 		tmp = pgprot_writecombine(tmp);
-#ifndef CONFIG_UML
+#if !(defined(CONFIG_UML) || defined(CONFIG_NTOS))
 	else if (boot_cpu_data.x86 > 3)
 		tmp = pgprot_noncached(tmp);
 #endif /* CONFIG_UML */
