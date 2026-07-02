@@ -215,6 +215,7 @@ static inline void arch_pick_mmap_layout(struct mm_struct *mm,
 
 static inline bool in_vfork(struct task_struct *tsk)
 {
+#ifdef CONFIG_KERNEL
 	bool ret;
 
 	/*
@@ -238,6 +239,9 @@ static inline bool in_vfork(struct task_struct *tsk)
 	rcu_read_unlock();
 
 	return ret;
+#else
+	return false;
+#endif
 }
 
 /*

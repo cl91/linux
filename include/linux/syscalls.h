@@ -1297,6 +1297,7 @@ static inline long ksys_truncate(const char __user *pathname, loff_t length)
 	return do_sys_truncate(pathname, length);
 }
 
+#ifdef CONFIG_KERNEL
 static inline unsigned int ksys_personality(unsigned int personality)
 {
 	unsigned int old = current->personality;
@@ -1306,6 +1307,7 @@ static inline unsigned int ksys_personality(unsigned int personality)
 
 	return old;
 }
+#endif
 
 /* for __ARCH_WANT_SYS_IPC */
 long ksys_semtimedop(int semid, struct sembuf __user *tsops,

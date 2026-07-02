@@ -298,6 +298,7 @@ static inline int kernel_dequeue_signal(void)
 	return ret;
 }
 
+#ifdef CONFIG_KERNEL
 static inline void kernel_signal_stop(void)
 {
 	spin_lock_irq(&current->sighand->siglock);
@@ -309,6 +310,7 @@ static inline void kernel_signal_stop(void)
 
 	schedule();
 }
+#endif
 
 int force_sig_fault_to_task(int sig, int code, void __user *addr,
 			    struct task_struct *t);
@@ -440,6 +442,7 @@ extern void calculate_sigpending(void);
 
 extern void signal_wake_up_state(struct task_struct *t, unsigned int state);
 
+#ifdef CONFIG_KERNEL
 static inline void signal_wake_up(struct task_struct *t, bool fatal)
 {
 	unsigned int state = 0;
@@ -565,6 +568,7 @@ static inline int kill_cad_pid(int sig, int priv)
 {
 	return kill_pid(cad_pid, sig, priv);
 }
+#endif	/* CONFIG_KERNEL */
 
 /* These can be the second arg to send_sig_info/send_group_sig_info.  */
 #define SEND_SIG_NOINFO ((struct kernel_siginfo *) 0)
@@ -703,7 +707,11 @@ static inline int get_nr_threads(struct task_struct *task)
 
 static inline bool thread_group_leader(struct task_struct *p)
 {
+#ifdef CONFIG_KERNEL
 	return p->exit_signal >= 0;
+#else
+	return true;
+#endif
 }
 
 static inline
@@ -717,10 +725,14 @@ bool same_thread_group(struct task_struct *p1, struct task_struct *p2)
  */
 static inline struct task_struct *__next_thread(struct task_struct *p)
 {
+#ifdef CONFIG_KERNEL
 	return list_next_or_null_rcu(&p->signal->thread_head,
 					&p->thread_node,
 					struct task_struct,
 					thread_node);
+#else
+	return NULL;
+#endif
 }
 
 static inline struct task_struct *next_thread(struct task_struct *p)
@@ -730,8 +742,12 @@ static inline struct task_struct *next_thread(struct task_struct *p)
 
 static inline int thread_group_empty(struct task_struct *p)
 {
+#ifdef CONFIG_KERNEL
 	return thread_group_leader(p) &&
 	       list_is_last(&p->thread_node, &p->signal->thread_head);
+#else
+	return false;
+#endif
 }
 
 #define delay_group_leader(p) \

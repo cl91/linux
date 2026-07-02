@@ -169,8 +169,10 @@ struct reclaim_state {
  */
 static inline void mm_account_reclaimed_pages(unsigned long pages)
 {
+#ifdef CONFIG_KERNEL
 	if (current->reclaim_state)
 		current->reclaim_state->reclaimed += pages;
+#endif
 }
 
 #ifdef __KERNEL__

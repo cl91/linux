@@ -28,7 +28,11 @@ static inline void uts_proc_notify(enum uts_proc proc)
 
 static inline struct new_utsname *utsname(void)
 {
+#ifdef CONFIG_KERNEL
 	return &current->nsproxy->uts_ns->name;
+#else
+	return &init_uts_ns.name;
+#endif
 }
 
 static inline struct new_utsname *init_utsname(void)

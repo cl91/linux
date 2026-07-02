@@ -200,6 +200,7 @@ static inline bool arch_memory_deny_write_exec_supported(void)
  */
 static inline bool map_deny_write_exec(unsigned long old, unsigned long new)
 {
+#ifdef CONFIG_KERNEL
 	/* If MDWE is disabled, we have nothing to deny. */
 	if (!mm_flags_test(MMF_HAS_MDWE, current->mm))
 		return false;
@@ -215,6 +216,7 @@ static inline bool map_deny_write_exec(unsigned long old, unsigned long new)
 	/* ...nor previously non-executable VMAs becoming executable. */
 	if (!(old & VM_EXEC))
 		return true;
+#endif
 
 	return false;
 }

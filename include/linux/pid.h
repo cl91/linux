@@ -252,6 +252,8 @@ static inline pid_t task_tgid_nr(struct task_struct *tsk)
 	return tsk->tgid;
 }
 
+#ifdef CONFIG_KERNEL
+
 /**
  * pid_alive - check that a task structure is not stale
  * @p: Task structure to be checked.
@@ -339,5 +341,7 @@ static inline int is_global_init(struct task_struct *tsk)
 {
 	return task_tgid_nr(tsk) == 1;
 }
+
+#endif	/* CONFIG_KERNEL */
 
 #endif /* _LINUX_PID_H */

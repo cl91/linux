@@ -50,7 +50,7 @@
 #include <linux/unwind_deferred_types.h>
 #include <asm/kmap_size.h>
 #include <linux/time64.h>
-#ifndef COMPILE_OFFSETS
+#if defined(CONFIG_KERNEL) && !defined(COMPILE_OFFSETS)
 #include <generated/rq-offsets.h>
 #endif
 
@@ -827,8 +827,10 @@ struct task_struct {
 #endif
 	unsigned int			__state;
 
+#ifdef CONFIG_KERNEL
 	/* saved state for "spinlock sleepers" */
 	unsigned int			saved_state;
+#endif
 
 	/*
 	 * This begins the randomizable portion of task_struct. Only
@@ -840,7 +842,9 @@ struct task_struct {
 	refcount_t			usage;
 	/* Per task flags (PF_*), defined further below: */
 	unsigned int			flags;
+#ifdef CONFIG_KERNEL
 	unsigned int			ptrace;
+#endif
 
 #ifdef CONFIG_MEM_ALLOC_PROFILING
 	struct alloc_tag		*alloc_tag;
@@ -868,6 +872,7 @@ struct task_struct {
 	int				normal_prio;
 	unsigned int			rt_priority;
 
+#ifdef CONFIG_KERNEL
 	struct sched_entity		se;
 	struct sched_rt_entity		rt;
 	struct sched_dl_entity		dl;
@@ -876,6 +881,7 @@ struct task_struct {
 	struct sched_ext_entity		scx;
 #endif
 	const struct sched_class	*sched_class;
+#endif	/* CONFIG_KERNEL */
 
 #ifdef CONFIG_SCHED_CORE
 	struct rb_node			core_node;
@@ -890,7 +896,7 @@ struct task_struct {
 	struct list_head		throttle_node;
 	bool				throttled;
 #endif
-#endif
+#endif	/* CONFIG_CGROUP_SCHED */
 
 
 #ifdef CONFIG_UCLAMP_TASK
@@ -906,7 +912,9 @@ struct task_struct {
 	struct uclamp_se		uclamp[UCLAMP_CNT];
 #endif
 
+#ifdef CONFIG_KERNEL
 	struct sched_statistics         stats;
+#endif
 
 #ifdef CONFIG_PREEMPT_NOTIFIERS
 	/* List of struct preempt_notifier: */
@@ -917,6 +925,7 @@ struct task_struct {
 	unsigned int			btrace_seq;
 #endif
 
+#ifdef CONFIG_KERNEL
 	unsigned int			policy;
 	unsigned long			max_allowed_capacity;
 	int				nr_cpus_allowed;
@@ -926,6 +935,7 @@ struct task_struct {
 	void				*migration_pending;
 	unsigned short			migration_disabled;
 	unsigned short			migration_flags;
+#endif
 
 #ifdef CONFIG_PREEMPT_RCU
 	int				rcu_read_lock_nesting;
@@ -949,13 +959,16 @@ struct task_struct {
 	struct srcu_ctr __percpu	*trc_reader_scp;
 #endif /* #ifdef CONFIG_TASKS_TRACE_RCU */
 
+#ifdef CONFIG_KERNEL
 	struct sched_info		sched_info;
 
 	struct list_head		tasks;
 	struct plist_node		pushable_tasks;
 	struct rb_node			pushable_dl_tasks;
+#endif
 
 	struct mm_struct		*mm;
+#ifdef CONFIG_KERNEL
 	struct mm_struct		*active_mm;
 
 	int				exit_state;
@@ -1052,6 +1065,7 @@ struct task_struct {
 	unsigned long			atomic_flags; /* Flags requiring atomic access. */
 
 	struct restart_block		restart_block;
+#endif	/* CONFIG_KERNEL */
 
 	pid_t				pid;
 	pid_t				tgid;
@@ -1060,6 +1074,8 @@ struct task_struct {
 	/* Canary value for the -fstack-protector GCC feature: */
 	unsigned long			stack_canary;
 #endif
+
+#ifdef CONFIG_KERNEL
 	/*
 	 * Pointers to the (original) parent process, youngest child, younger sibling,
 	 * older sibling, respectively.  (p->father can be replaced with
@@ -1077,8 +1093,10 @@ struct task_struct {
 	 */
 	struct list_head		children;
 	struct list_head		sibling;
+#endif
 	struct task_struct		*group_leader;
 
+#ifdef CONFIG_KERNEL
 	/*
 	 * 'ptraced' is the list of tasks this task is using ptrace() on.
 	 *
@@ -1087,23 +1105,29 @@ struct task_struct {
 	 */
 	struct list_head		ptraced;
 	struct list_head		ptrace_entry;
+#endif
 
 	/* PID/PID hash table linkage. */
 	struct pid			*thread_pid;
 	struct hlist_node		pid_links[PIDTYPE_MAX];
+#ifdef CONFIG_KERNEL
 	struct list_head		thread_node;
+#endif
 
 	struct completion		*vfork_done;
 
+#ifdef CONFIG_KERNEL
 	/* CLONE_CHILD_SETTID: */
 	int __user			*set_child_tid;
 
 	/* CLONE_CHILD_CLEARTID: */
 	int __user			*clear_child_tid;
+#endif
 
 	/* PF_KTHREAD | PF_IO_WORKER */
 	void				*worker_private;
 
+#ifdef CONFIG_KERNEL
 	u64				utime;
 	u64				stime;
 #ifdef CONFIG_ARCH_HAS_SCALED_CPUTIME
@@ -1147,6 +1171,7 @@ struct task_struct {
 
 	/* Objective and real subjective task credentials (COW): */
 	const struct cred __rcu		*real_cred;
+#endif	/* CONFIG_KERNEL */
 
 	/* Effective (overridable) subjective task credentials (COW): */
 	const struct cred __rcu		*cred;
@@ -1168,6 +1193,7 @@ struct task_struct {
 	 */
 	char				comm[TASK_COMM_LEN];
 
+#ifdef CONFIG_KERNEL
 	struct nameidata		*nameidata;
 
 #ifdef CONFIG_SYSVIPC
@@ -1191,6 +1217,7 @@ struct task_struct {
 
 	/* Namespaces: */
 	struct nsproxy			*nsproxy;
+#endif	/* CONFIG_KERNEL */
 
 	/* Signal handlers: */
 	struct signal_struct		*signal;
@@ -1204,7 +1231,9 @@ struct task_struct {
 	size_t				sas_ss_size;
 	unsigned int			sas_ss_flags;
 
+#ifdef CONFIG_KERNEL
 	struct callback_head		*task_works;
+#endif
 
 #ifdef CONFIG_AUDIT
 #ifdef CONFIG_AUDITSYSCALL
@@ -1213,12 +1242,14 @@ struct task_struct {
 	kuid_t				loginuid;
 	unsigned int			sessionid;
 #endif
+#ifdef CONFIG_KERNEL
 	struct seccomp			seccomp;
 	struct syscall_user_dispatch	syscall_dispatch;
 
 	/* Thread group tracking: */
 	u64				parent_exec_id;
 	u64				self_exec_id;
+#endif
 
 	/* Protection against (de-)allocation: mm, files, fs, tty, keyrings, mems_allowed, mempolicy: */
 	spinlock_t			alloc_lock;
@@ -1275,6 +1306,7 @@ struct task_struct {
 	unsigned int			in_ubsan;
 #endif
 
+#ifdef CONFIG_KERNEL
 	/* Journalling filesystem info: */
 	void				*journal_info;
 
@@ -1447,6 +1479,7 @@ struct task_struct {
 	 */
 	u64				timer_slack_ns;
 	u64				default_timer_slack_ns;
+#endif	/* CONFIG_KERNEL */
 
 #if defined(CONFIG_KASAN_GENERIC) || defined(CONFIG_KASAN_SW_TAGS)
 	unsigned int			kasan_depth;
@@ -1686,7 +1719,11 @@ static inline unsigned int __task_state_index(unsigned int tsk_state,
 
 static inline unsigned int task_state_index(struct task_struct *tsk)
 {
+#ifdef CONFIG_KERNEL
 	return __task_state_index(READ_ONCE(tsk->__state), tsk->exit_state);
+#else
+	return __task_state_index(READ_ONCE(tsk->__state), 0);
+#endif
 }
 
 static inline char task_index_to_char(unsigned int state)
@@ -1814,14 +1851,20 @@ extern struct pid *cad_pid;
 
 static __always_inline bool is_percpu_thread(void)
 {
+#ifdef CONFIG_KERNEL
 	return (current->flags & PF_NO_SETAFFINITY) &&
 		(current->nr_cpus_allowed  == 1);
+#else
+	return false;
+#endif
 }
 
 static __always_inline bool is_user_task(struct task_struct *task)
 {
 	return task->mm && !(task->flags & (PF_KTHREAD | PF_USER_WORKER));
 }
+
+#ifdef CONFIG_KERNEL
 
 /* Per-process atomic flags. */
 #define PFA_NO_NEW_PRIVS		0	/* May not gain new privileges. */
@@ -1873,6 +1916,8 @@ TASK_PFA_CLEAR(SPEC_IB_DISABLE, spec_ib_disable)
 
 TASK_PFA_TEST(SPEC_IB_FORCE_DISABLE, spec_ib_force_disable)
 TASK_PFA_SET(SPEC_IB_FORCE_DISABLE, spec_ib_force_disable)
+
+#endif	/* CONFIG_KERNEL */
 
 static inline void
 current_restore_flags(unsigned long orig_flags, unsigned long flags)
@@ -2276,7 +2321,11 @@ static inline void set_task_cpu(struct task_struct *p, unsigned int cpu)
 
 static inline bool task_is_runnable(struct task_struct *p)
 {
+#ifdef CONFIG_KERNEL
 	return p->on_rq && !p->se.sched_delayed;
+#else
+	return p->on_rq;
+#endif
 }
 
 extern bool sched_task_on_rq(struct task_struct *p);
@@ -2399,6 +2448,7 @@ DECLARE_PER_CPU_SHARED_ALIGNED(struct rq, runqueues);
 
 static inline void __migrate_enable(void)
 {
+#ifdef CONFIG_KERNEL
 	struct task_struct *p = current;
 
 #ifdef CONFIG_DEBUG_PREEMPT
@@ -2430,10 +2480,12 @@ static inline void __migrate_enable(void)
 	barrier();
 	p->migration_disabled = 0;
 	this_rq_pinned()--;
+#endif
 }
 
 static inline void __migrate_disable(void)
 {
+#ifdef CONFIG_KERNEL
 	struct task_struct *p = current;
 
 	if (p->migration_disabled) {
@@ -2450,6 +2502,7 @@ static inline void __migrate_disable(void)
 	guard(preempt)();
 	this_rq_pinned()++;
 	p->migration_disabled = 1;
+#endif
 }
 #else /* !COMPILE_OFFSETS */
 static inline void __migrate_disable(void) { }

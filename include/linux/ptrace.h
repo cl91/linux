@@ -11,6 +11,8 @@
 #include <uapi/linux/ptrace.h>
 #include <linux/seccomp.h>
 
+#ifdef CONFIG_KERNEL
+
 /* Add sp to seccomp_data, as seccomp is user API, we don't want to modify it */
 struct syscall_info {
 	__u64			sp;
@@ -231,6 +233,8 @@ static inline void ptrace_release_task(struct task_struct *task)
 	BUG_ON(!list_empty(&task->ptrace_entry));
 }
 
+#endif
+
 #ifndef force_successful_syscall_return
 /*
  * System call handlers that, upon successful completion, need to return a
@@ -397,6 +401,7 @@ static inline void user_single_step_report(struct pt_regs *regs)
 #define exception_ip(x) instruction_pointer(x)
 #endif
 
+#ifdef CONFIG_KERNEL
 extern int task_current_syscall(struct task_struct *target, struct syscall_info *info);
 
 extern void sigaction_compat_abi(struct k_sigaction *act, struct k_sigaction *oact);
@@ -476,4 +481,6 @@ static inline void ptrace_report_syscall_exit(struct pt_regs *regs, int step)
 	else
 		ptrace_report_syscall(PTRACE_EVENTMSG_SYSCALL_EXIT);
 }
+#endif
+
 #endif

@@ -35,6 +35,7 @@ static inline bool rt_or_dl_task(struct task_struct *p)
 	return rt_or_dl_prio(p->prio);
 }
 
+#ifdef CONFIG_KERNEL
 /*
  * Returns true if a task has a policy that belongs to RT or DL classes.
  * PI-boosted tasks will return false.
@@ -49,6 +50,7 @@ static inline bool rt_or_dl_task_policy(struct task_struct *tsk)
 		return true;
 	return false;
 }
+#endif
 
 #ifdef CONFIG_RT_MUTEXES
 extern void rt_mutex_pre_schedule(void);

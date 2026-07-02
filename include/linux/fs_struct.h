@@ -44,7 +44,11 @@ extern bool current_chrooted(void);
 
 static inline int current_umask(void)
 {
+#ifdef CONFIG_KERNEL
 	return current->fs->umask;
+#else
+	return 0;
+#endif
 }
 
 #endif /* _LINUX_FS_STRUCT_H */
