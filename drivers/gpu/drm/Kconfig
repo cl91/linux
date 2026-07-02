@@ -187,7 +187,7 @@ source "drivers/gpu/drm/display/Kconfig"
 
 config DRM_TTM
 	tristate
-	depends on DRM && MMU
+	depends on DRM && (MMU || !KERNEL)
 	select SHMEM
 	help
 	  GPU memory management subsystem for devices with multiple
@@ -250,7 +250,7 @@ config DRM_GEM_DMA_HELPER
 
 config DRM_GEM_SHMEM_HELPER
 	tristate
-	depends on DRM && MMU
+	depends on DRM && (MMU || !KERNEL)
 	select DRM_KMS_HELPER if DRM_FBDEV_EMULATION
 	select FB_CORE if DRM_FBDEV_EMULATION
 	select FB_SYSMEM_HELPERS_DEFERRED if DRM_FBDEV_EMULATION
