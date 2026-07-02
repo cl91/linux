@@ -29,7 +29,7 @@
 #include <net/netlink.h>
 #include <net/net_namespace.h>
 
-
+#ifdef CONFIG_KERNEL
 atomic64_t uevent_seqnum;
 #ifdef CONFIG_UEVENT_HELPER
 char uevent_helper[UEVENT_HELPER_PATH_LEN] = CONFIG_UEVENT_HELPER_PATH;
@@ -45,6 +45,8 @@ static LIST_HEAD(uevent_sock_list);
 /* This lock protects uevent_sock_list */
 static DEFINE_MUTEX(uevent_sock_mutex);
 #endif
+
+#endif	/* CONFIG_KERNEL */
 
 /* the strings here must match the enum in include/linux/kobject.h */
 static const char *kobject_actions[] = {
@@ -230,6 +232,8 @@ out:
 	}
 	return r;
 }
+
+#ifdef CONFIG_KERNEL
 
 #ifdef CONFIG_UEVENT_HELPER
 static int kobj_usermode_filter(struct kobject *kobj)
@@ -645,6 +649,8 @@ exit:
 }
 EXPORT_SYMBOL_GPL(kobject_uevent_env);
 
+#endif	/* CONFIG_KERNEL */
+
 /**
  * kobject_uevent - notify userspace by sending an uevent
  *
@@ -694,6 +700,8 @@ int add_uevent_var(struct kobj_uevent_env *env, const char *format, ...)
 	return 0;
 }
 EXPORT_SYMBOL_GPL(add_uevent_var);
+
+#ifdef CONFIG_KERNEL
 
 #if defined(CONFIG_NET)
 static int uevent_net_broadcast(struct sock *usk, struct sk_buff *skb,
@@ -849,3 +857,5 @@ static int __init init_uevent_helper_sysctl(void)
 
 postcore_initcall(init_uevent_helper_sysctl);
 #endif
+
+#endif	/* CONFIG_KERNEL */
