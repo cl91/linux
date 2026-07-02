@@ -56,6 +56,13 @@ void drm_client_setup(struct drm_device *dev, const struct drm_format_info *form
 		return;
 	}
 #endif
+
+#ifdef CONFIG_DRM_CLIENT_NTOS
+	if (!strcmp(drm_client_default, "ntos")) {
+		drm_ntos_register(dev);
+		return;
+	}
+#endif
 	if (strcmp(drm_client_default, ""))
 		drm_warn(dev, "Unknown DRM client %s\n", drm_client_default);
 }
