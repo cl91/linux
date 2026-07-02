@@ -4,6 +4,7 @@
 #
 
 menu "File systems"
+	depends on KERNEL
 
 # Use unaligned word dcache accesses
 config DCACHE_WORD_ACCESS
