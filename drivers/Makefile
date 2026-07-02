@@ -20,7 +20,7 @@ obj-y				+= pwm/
 # LEDs must come before PCI, it is needed by NPEM driver
 obj-y				+= leds/
 
-obj-y				+= pci/
+obj-$(CONFIG_KERNEL)		+= pci/
 
 obj-$(CONFIG_PARISC)		+= parisc/
 obj-$(CONFIG_RAPIDIO)		+= rapidio/
