@@ -578,6 +578,7 @@ struct device {
 					   core doesn't touch it */
 	void		*driver_data;	/* Driver data, set and get with
 					   dev_set_drvdata/dev_get_drvdata */
+	void		*lnxdrv_data;	/* If set, device has an NT device object. */
 	struct {
 		const char	*name;
 		spinlock_t	lock;

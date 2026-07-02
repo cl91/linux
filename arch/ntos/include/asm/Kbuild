@@ -1,0 +1,17 @@
+generic-y += cache.h
+generic-y += cmpxchg-local.h
+generic-y += extable.h
+generic-y += ioctl.h
+generic-y += irqflags.h
+generic-y += mcs_spinlock.h
+generic-y += param.h
+generic-y += parport.h
+generic-y += pci_iomap.h
+generic-y += resource.h
+generic-y += seccomp.h
+generic-y += signal.h
+generic-y += statfs.h
+generic-y += user.h
+generic-y += kvm_para.h
+
+generated-y += config.h

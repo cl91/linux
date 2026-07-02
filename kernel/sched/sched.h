@@ -5,6 +5,25 @@
 #ifndef _KERNEL_SCHED_SCHED_H
 #define _KERNEL_SCHED_SCHED_H
 
+#ifndef CONFIG_KERNEL
+#include <linux/sched.h>
+#include <linux/wait.h>
+#include <linux/swait.h>
+#include <linux/wait_bit.h>
+#include <linux/hash.h>
+#include <linux/jiffies.h>
+#define WF_SYNC 0
+#define WF_CURRENT_CPU 0
+#define EPOLLHUP 0
+#define POLLFREE 0
+#define signal_pending_state(...) 0
+#define signal_pending(...) 0
+#define kthread_should_stop_or_park(...) 0
+extern void swake_up_all_locked(struct swait_queue_head *q);
+extern void __prepare_to_swait(struct swait_queue_head *q, struct swait_queue *wait);
+extern int try_to_wake_up(struct task_struct *tsk, unsigned int state, int wake_flags);
+#else
+
 #include <linux/prandom.h>
 #include <linux/sched/affinity.h>
 #include <linux/sched/autogroup.h>
@@ -4108,5 +4127,7 @@ DEFINE_CLASS(sched_change, struct sched_change_ctx *,
 DEFINE_CLASS_IS_UNCONDITIONAL(sched_change)
 
 #include "ext.h"
+
+#endif	/* CONFIG_KERNEL */
 
 #endif /* _KERNEL_SCHED_SCHED_H */

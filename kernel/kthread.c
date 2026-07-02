@@ -30,6 +30,7 @@
 #include <linux/sched/isolation.h>
 #include <trace/events/sched.h>
 
+#ifdef CONFIG_KERNEL
 
 static DEFINE_SPINLOCK(kthread_create_lock);
 static LIST_HEAD(kthread_create_list);
@@ -955,6 +956,8 @@ static int kthreads_init(void)
 }
 early_initcall(kthreads_init);
 
+#endif	/* CONFIG_KERNEL */
+
 void __kthread_init_worker(struct kthread_worker *worker,
 				const char *name,
 				struct lock_class_key *key)
@@ -1608,6 +1611,8 @@ void kthread_destroy_worker(struct kthread_worker *worker)
 }
 EXPORT_SYMBOL(kthread_destroy_worker);
 
+#ifdef CONFIG_KERNEL
+
 /**
  * kthread_use_mm - make the calling kthread operate on an address space
  * @mm: address space to operate on
@@ -1737,3 +1742,5 @@ struct cgroup_subsys_state *kthread_blkcg(void)
 	return NULL;
 }
 #endif
+
+#endif	/* CONFIG_KERNEL */

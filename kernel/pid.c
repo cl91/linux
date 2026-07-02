@@ -46,6 +46,8 @@
 #include <net/sock.h>
 #include <uapi/linux/pidfd.h>
 
+#ifdef CONFIG_KERNEL
+
 struct pid init_struct_pid = {
 	.count		= REFCOUNT_INIT(1),
 	.tasks		= {
@@ -83,6 +85,8 @@ struct pid_namespace init_pid_ns = {
 };
 EXPORT_SYMBOL_GPL(init_pid_ns);
 
+#endif	/* CONFIG_KERNEL */
+
 static  __cacheline_aligned_in_smp DEFINE_SPINLOCK(pidmap_lock);
 
 void put_pid(struct pid *pid)
@@ -94,7 +98,9 @@ void put_pid(struct pid *pid)
 
 	ns = pid->numbers[pid->level].ns;
 	if (refcount_dec_and_test(&pid->count)) {
+#ifdef CONFIG_KERNEL
 		pidfs_free_pid(pid);
+#endif
 		kmem_cache_free(ns->pid_cachep, pid);
 		put_pid_ns(ns);
 	}
@@ -582,6 +588,8 @@ struct pid *find_ge_pid(int nr, struct pid_namespace *ns)
 }
 EXPORT_SYMBOL_GPL(find_ge_pid);
 
+#ifdef CONFIG_KERNEL
+
 struct pid *pidfd_get_pid(unsigned int fd, unsigned int *flags)
 {
 	CLASS(fd, f)(fd);
@@ -963,3 +971,5 @@ SYSCALL_DEFINE3(pidfd_getfd, int, pidfd, int, fd,
 
 	return pidfd_getfd(pid, fd);
 }
+
+#endif	/* CONFIG_KERNEL */

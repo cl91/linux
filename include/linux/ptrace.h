@@ -105,6 +105,8 @@ int generic_ptrace_peekdata(struct task_struct *tsk, unsigned long addr,
 int generic_ptrace_pokedata(struct task_struct *tsk, unsigned long addr,
 			    unsigned long data);
 
+#endif	/* CONFIG_KERNEL */
+
 /**
  * ptrace_parent - return the task that is tracing the given task
  * @task: task to consider
@@ -118,10 +120,14 @@ int generic_ptrace_pokedata(struct task_struct *tsk, unsigned long addr,
  */
 static inline struct task_struct *ptrace_parent(struct task_struct *task)
 {
+#ifdef CONFIG_KERNEL
 	if (unlikely(task->ptrace))
 		return rcu_dereference(task->parent);
+#endif
 	return NULL;
 }
+
+#ifdef CONFIG_KERNEL
 
 /**
  * ptrace_event_enabled - test whether a ptrace event is enabled
@@ -481,6 +487,7 @@ static inline void ptrace_report_syscall_exit(struct pt_regs *regs, int step)
 	else
 		ptrace_report_syscall(PTRACE_EVENTMSG_SYSCALL_EXIT);
 }
-#endif
+
+#endif	/* CONFIG_KERNEL */
 
 #endif

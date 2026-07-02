@@ -91,6 +91,8 @@
 #define ELF_PLATFORM		("aarch64")
 #endif
 
+#ifndef CONFIG_NTOS
+
 /*
  * This is used to ensure we don't load something for the wrong architecture.
  */
@@ -294,5 +296,7 @@ static inline int arch_check_elf(void *ehdr, bool has_interp,
 }
 
 #endif /* !__ASSEMBLER__ */
+
+#endif	/* !CONFIG_NTOS */
 
 #endif
