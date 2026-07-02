@@ -472,7 +472,7 @@ config SIGNATURE
 
 config DIMLIB
 	tristate
-	depends on NET
+	depends on NET_BASE
 	help
 	  Dynamic Interrupt Moderation library.
 	  Implements an algorithm for dynamically changing CQ moderation values

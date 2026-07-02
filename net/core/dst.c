@@ -133,6 +133,8 @@ static void dst_destroy_rcu(struct rcu_head *head)
 	dst_destroy(dst);
 }
 
+#ifdef CONFIG_NET
+
 /* Operations to mark dst as DEAD and clean up the net device referenced
  * by dst:
  * 1. put the dst under blackhole interface and discard all tx/rx packets
@@ -156,6 +158,8 @@ void dst_dev_put(struct dst_entry *dst)
 			   GFP_ATOMIC);
 }
 EXPORT_SYMBOL(dst_dev_put);
+
+#endif	/* CONFIG_NET */
 
 static void dst_count_dec(struct dst_entry *dst)
 {

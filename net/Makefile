@@ -6,25 +6,27 @@
 # Rewritten to use lists instead of if-statements.
 #
 
-obj-y				:= devres.o socket.o core/
+obj-$(CONFIG_NET_BASE)		:= core/ devres.o
+obj-$(CONFIG_NET)		+= socket.o
 
 obj-$(CONFIG_COMPAT)		+= compat.o
 
 # LLC has to be linked before the files in net/802/
 obj-$(CONFIG_LLC)		+= llc/
-obj-y				+= ethernet/ 802/ sched/ netlink/ bpf/ ethtool/
+obj-$(CONFIG_NET_BASE)		+= sched/ ethernet/ ethtool/
+obj-$(CONFIG_NET)		+= 802/ netlink/ bpf/
 obj-$(CONFIG_NETFILTER)		+= netfilter/
 obj-$(CONFIG_INET)		+= ipv4/
 obj-$(CONFIG_TLS)		+= tls/
 obj-$(CONFIG_XFRM)		+= xfrm/
 obj-$(CONFIG_UNIX)		+= unix/
 obj-$(CONFIG_INET_PSP)		+= psp/
-obj-y				+= ipv6/
+obj-$(CONFIG_NET)		+= ipv6/
 obj-$(CONFIG_PACKET)		+= packet/
 obj-$(CONFIG_NET_KEY)		+= key/
 obj-$(CONFIG_BRIDGE)		+= bridge/
 obj-$(CONFIG_NET_DEVLINK)	+= devlink/
-obj-y				+= dsa/
+obj-$(CONFIG_NET)		+= dsa/
 obj-$(CONFIG_ATALK)		+= appletalk/
 obj-$(CONFIG_X25)		+= x25/
 obj-$(CONFIG_LAPB)		+= lapb/

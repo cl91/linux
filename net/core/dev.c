@@ -168,7 +168,9 @@
 #include "devmem.h"
 #include "net-sysfs.h"
 
+#ifdef CONFIG_NET
 static DEFINE_SPINLOCK(ptype_lock);
+#endif
 struct list_head ptype_base[PTYPE_HASH_SIZE] __read_mostly;
 
 static int netif_rx_internal(struct sk_buff *skb);
@@ -464,6 +466,8 @@ DEFINE_PER_CPU_ALIGNED(struct softnet_data, softnet_data) = {
 };
 EXPORT_PER_CPU_SYMBOL(softnet_data);
 
+#ifdef CONFIG_NET
+
 /* Page_pool has a lockless array/stack to alloc/recycle pages.
  * PP consumers must pay attention to run APIs in the appropriate context
  * (e.g. NAPI context).
@@ -471,6 +475,8 @@ EXPORT_PER_CPU_SYMBOL(softnet_data);
 DEFINE_PER_CPU(struct page_pool_bh, system_page_pool) = {
 	.bh_lock = INIT_LOCAL_LOCK(bh_lock),
 };
+
+#endif	/* CONFIG_NET */
 
 #ifdef CONFIG_LOCKDEP
 /*
@@ -567,6 +573,8 @@ static inline void netdev_set_addr_lockdep_class(struct net_device *dev)
 {
 }
 #endif
+
+#ifdef CONFIG_NET
 
 /*******************************************************************************
  *
@@ -690,6 +698,7 @@ void dev_remove_pack(struct packet_type *pt)
 }
 EXPORT_SYMBOL(dev_remove_pack);
 
+#endif	/* CONFIG_NET */
 
 /*******************************************************************************
  *
@@ -713,6 +722,8 @@ int dev_get_iflink(const struct net_device *dev)
 	return READ_ONCE(dev->ifindex);
 }
 EXPORT_SYMBOL(dev_get_iflink);
+
+#ifdef CONFIG_NET
 
 /**
  *	dev_fill_metadata_dst - Retrieve tunnel egress information.
@@ -789,6 +800,8 @@ int dev_fill_forward_path(const struct net_device *dev, const u8 *daddr,
 	return ret;
 }
 EXPORT_SYMBOL_GPL(dev_fill_forward_path);
+
+#endif	/* CONFIG_NET */
 
 /* must be called under rcu_read_lock(), as we dont take a reference */
 static struct napi_struct *napi_by_id(unsigned int napi_id)
@@ -1606,6 +1619,8 @@ void netif_state_change(struct net_device *dev)
 	}
 }
 
+#ifdef CONFIG_NET
+
 /**
  * __netdev_notify_peers - notify network peers about existence of @dev,
  * to be called when rtnl lock is already held.
@@ -1642,6 +1657,8 @@ void netdev_notify_peers(struct net_device *dev)
 	rtnl_unlock();
 }
 EXPORT_SYMBOL(netdev_notify_peers);
+
+#endif	/* CONFIG_NET */
 
 static int napi_threaded_poll(void *data);
 
@@ -1839,6 +1856,8 @@ void netif_disable_lro(struct net_device *dev)
 }
 EXPORT_IPV6_MOD(netif_disable_lro);
 
+#ifdef CONFIG_NET
+
 /**
  *	dev_disable_gro_hw - disable HW Generic Receive Offload on a device
  *	@dev: device
@@ -1855,6 +1874,8 @@ static void dev_disable_gro_hw(struct net_device *dev)
 	if (unlikely(dev->features & NETIF_F_GRO_HW))
 		netdev_WARN(dev, "failed to disable GRO_HW!\n");
 }
+
+#endif	/* CONFIG_NET */
 
 const char *netdev_cmd_to_name(enum netdev_cmd cmd)
 {
@@ -2249,6 +2270,8 @@ int call_netdevice_notifiers_info(unsigned long val,
 	return raw_notifier_call_chain(&netdev_chain, val, info);
 }
 
+#ifdef CONFIG_NET
+
 /**
  *	call_netdevice_notifiers_info_robust - call per-netns notifier blocks
  *	                                       for and rollback on error
@@ -2274,6 +2297,8 @@ call_netdevice_notifiers_info_robust(unsigned long val_up,
 	return raw_notifier_call_chain_robust(&net->netdev_chain,
 					      val_up, val_down, info);
 }
+
+#endif	/* CONFIG_NET */
 
 static int call_netdevice_notifiers_extack(unsigned long val,
 					   struct net_device *dev,
@@ -2428,6 +2453,8 @@ static inline void net_timestamp_set(struct sk_buff *skb)
 			(SKB)->tstamp = ktime_get_real();	\
 	}							\
 
+#ifdef CONFIG_NET
+
 bool is_skb_forwardable(const struct net_device *dev, const struct sk_buff *skb)
 {
 	return __is_skb_forwardable(dev, skb, true);
@@ -2481,6 +2508,8 @@ int dev_forward_skb_nomtu(struct net_device *dev, struct sk_buff *skb)
 {
 	return __dev_forward_skb2(dev, skb, false) ?: netif_rx_internal(skb);
 }
+
+#endif	/* CONFIG_NET */
 
 static int deliver_skb(struct sk_buff *skb,
 		       struct packet_type *pt_prev,
@@ -2610,6 +2639,8 @@ out_unlock:
 	rcu_read_unlock();
 }
 EXPORT_SYMBOL_GPL(dev_queue_xmit_nit);
+
+#ifdef CONFIG_NET
 
 /**
  * netif_setup_tc - Handle tc mappings on real_num_tx_queues change
@@ -3304,6 +3335,8 @@ undo_rx:
 }
 EXPORT_SYMBOL(netif_set_real_num_queues);
 
+#endif	/* CONFIG_NET */
+
 /**
  * netif_set_tso_max_size() - set the max size of TSO frames supported
  * @dev:	netdev to update
@@ -3352,6 +3385,8 @@ void netif_inherit_tso_max(struct net_device *to, const struct net_device *from)
 }
 EXPORT_SYMBOL(netif_inherit_tso_max);
 
+#ifdef CONFIG_NET
+
 /**
  * netif_get_num_default_rss_queues - default number of RSS queues
  *
@@ -3376,6 +3411,8 @@ int netif_get_num_default_rss_queues(void)
 	return count > 2 ? DIV_ROUND_UP(count, 2) : count;
 }
 EXPORT_SYMBOL(netif_get_num_default_rss_queues);
+
+#endif	/* CONFIG_NET */
 
 static void __netif_reschedule(struct Qdisc *q)
 {
@@ -4321,6 +4358,8 @@ static void skb_update_prio(struct sk_buff *skb)
 #define skb_update_prio(skb)
 #endif
 
+#ifdef CONFIG_NET
+
 /**
  *	dev_loopback_xmit - loop back @skb
  *	@net: network namespace this loopback is happening in
@@ -4340,6 +4379,8 @@ int dev_loopback_xmit(struct net *net, struct sock *sk, struct sk_buff *skb)
 	return 0;
 }
 EXPORT_SYMBOL(dev_loopback_xmit);
+
+#endif	/* CONFIG_NET */
 
 #ifdef CONFIG_NET_EGRESS
 static struct netdev_queue *
@@ -5394,6 +5435,8 @@ bad_dev:
 	return NET_RX_DROP;
 }
 
+#ifdef CONFIG_NET
+
 static struct netdev_rx_queue *netif_get_rxqueue(struct sk_buff *skb)
 {
 	struct net_device *dev = skb->dev;
@@ -5660,6 +5703,8 @@ out_redir:
 	return XDP_DROP;
 }
 EXPORT_SYMBOL_GPL(do_xdp_generic);
+
+#endif	/* CONFIG_NET */
 
 static int netif_rx_internal(struct sk_buff *skb)
 {
@@ -5984,6 +6029,7 @@ another_round:
 
 	__this_cpu_inc(softnet_data.processed);
 
+#ifdef CONFIG_NET
 	if (static_branch_unlikely(&generic_xdp_needed_key)) {
 		int ret2;
 
@@ -5997,6 +6043,7 @@ another_round:
 			goto out;
 		}
 	}
+#endif
 
 	if (eth_type_vlan(skb->protocol)) {
 		skb = skb_vlan_untag(skb);
@@ -6326,6 +6373,8 @@ static void __netif_receive_skb_list(struct list_head *head)
 		memalloc_noreclaim_restore(noreclaim_flag);
 }
 
+#ifdef CONFIG_NET
+
 static int generic_xdp_install(struct net_device *dev, struct netdev_bpf *xdp)
 {
 	struct bpf_prog *old = rtnl_dereference(dev->xdp_prog);
@@ -6354,6 +6403,8 @@ static int generic_xdp_install(struct net_device *dev, struct netdev_bpf *xdp)
 
 	return ret;
 }
+
+#endif	/* CONFIG_NET */
 
 static int netif_receive_skb_internal(struct sk_buff *skb)
 {
@@ -6577,6 +6628,8 @@ static void flush_all_backlogs(void)
 		mutex_unlock(&flush_backlogs_mutex);
 }
 
+#ifdef CONFIG_NET
+
 static void net_rps_send_ipi(struct softnet_data *remsd)
 {
 #ifdef CONFIG_RPS
@@ -6589,6 +6642,8 @@ static void net_rps_send_ipi(struct softnet_data *remsd)
 	}
 #endif
 }
+
+#endif	/* CONFIG_NET */
 
 /*
  * net_rps_action_and_irq_enable sends any pending IPI's for rps.
@@ -9130,6 +9185,8 @@ void netdev_adjacent_change_abort(struct net_device *old_dev,
 }
 EXPORT_SYMBOL(netdev_adjacent_change_abort);
 
+#ifdef CONFIG_NET
+
 /**
  * netdev_bonding_info_change - Dispatch event about slave change
  * @dev: device
@@ -9443,6 +9500,8 @@ struct net_device *netdev_sk_get_lowest_dev(struct net_device *dev,
 }
 EXPORT_SYMBOL(netdev_sk_get_lowest_dev);
 
+#endif	/* CONFIG_NET */
+
 static void netdev_adjacent_add_links(struct net_device *dev)
 {
 	struct netdev_adjacent *iter;
@@ -9533,6 +9592,7 @@ void *netdev_lower_dev_get_private(struct net_device *dev,
 }
 EXPORT_SYMBOL(netdev_lower_dev_get_private);
 
+#ifdef CONFIG_NET
 
 /**
  * netdev_lower_state_changed - Dispatch event about lower device state change
@@ -9555,6 +9615,8 @@ void netdev_lower_state_changed(struct net_device *lower_dev,
 				      &changelowerstate_info.info);
 }
 EXPORT_SYMBOL(netdev_lower_state_changed);
+
+#endif	/* CONFIG_NET */
 
 static void dev_change_rx_flags(struct net_device *dev, int flags)
 {
@@ -9709,6 +9771,8 @@ void dev_set_rx_mode(struct net_device *dev)
 	netif_addr_unlock_bh(dev);
 }
 
+#ifdef CONFIG_NET
+
 /**
  * netif_get_flags() - get flags reported to userspace
  * @dev: device
@@ -9739,6 +9803,8 @@ unsigned int netif_get_flags(const struct net_device *dev)
 	return flags;
 }
 EXPORT_SYMBOL(netif_get_flags);
+
+#endif
 
 int __dev_change_flags(struct net_device *dev, unsigned int flags,
 		       struct netlink_ext_ack *extack)
@@ -9943,6 +10009,8 @@ int netif_set_mtu(struct net_device *dev, int new_mtu)
 }
 EXPORT_SYMBOL(netif_set_mtu);
 
+#ifdef CONFIG_NET
+
 int netif_change_tx_queue_len(struct net_device *dev, unsigned long new_len)
 {
 	unsigned int orig_len = dev->tx_queue_len;
@@ -9974,6 +10042,8 @@ void netif_set_group(struct net_device *dev, int new_group)
 {
 	dev->group = new_group;
 }
+
+#endif	/* CONFIG_NET */
 
 /**
  * netif_pre_changeaddr_notify() - Call NETDEV_PRE_CHANGEADDR.
@@ -10054,6 +10124,8 @@ unlock:
 	return ret;
 }
 EXPORT_SYMBOL_NS_GPL(netif_get_mac_address, "NETDEV_INTERNAL");
+
+#ifdef CONFIG_NET
 
 int netif_change_carrier(struct net_device *dev, bool new_carrier)
 {
@@ -10790,6 +10862,8 @@ u32 dev_get_min_mp_channel_count(const struct net_device *dev)
 	return 0;
 }
 
+#endif	/* CONFIG_NET */
+
 /**
  * dev_index_reserve() - allocate an ifindex in a namespace
  * @net: the applicable net namespace
@@ -11127,6 +11201,8 @@ void netdev_change_features(struct net_device *dev)
 }
 EXPORT_SYMBOL(netdev_change_features);
 
+#ifdef CONFIG_NET
+
 /**
  *	netif_stacked_transfer_operstate -	transfer operstate
  *	@rootdev: the root or lower level device to transfer state from
@@ -11155,6 +11231,8 @@ void netif_stacked_transfer_operstate(const struct net_device *rootdev,
 		netif_carrier_off(dev);
 }
 EXPORT_SYMBOL(netif_stacked_transfer_operstate);
+
+#endif	/* CONFIG_NET */
 
 static int netif_alloc_rx_queues(struct net_device *dev)
 {
@@ -11458,7 +11536,9 @@ int register_netdevice(struct net_device *dev)
 
 	set_bit(__LINK_STATE_PRESENT, &dev->state);
 
+#ifdef CONFIG_NET
 	linkwatch_init_dev(dev);
+#endif
 
 	dev_init_scheduler(dev);
 
@@ -12418,12 +12498,16 @@ void unregister_netdevice_many_notify(struct list_head *head,
 		netdev_lock_ops(dev);
 		dev_shutdown(dev);
 		dev_tcx_uninstall(dev);
+#ifdef CONFIG_NET
 		dev_xdp_uninstall(dev);
+#endif
 		dev_memory_provider_uninstall(dev);
 		netdev_unlock_ops(dev);
 		bpf_dev_bound_netdev_unregister(dev);
 
+#ifdef CONFIG_NET
 		netdev_offload_xstats_disable_all(dev);
+#endif
 
 		/* Notify protocols, that we are about to destroy
 		 * this device. They should clean all the things.
@@ -12697,6 +12781,8 @@ out:
 	return err;
 }
 
+#ifdef CONFIG_NET
+
 static int dev_cpu_dead(unsigned int oldcpu)
 {
 	struct sk_buff **list_skb;
@@ -12881,6 +12967,8 @@ void netdev_compute_master_upper_features(struct net_device *dev, bool update_he
 }
 EXPORT_SYMBOL(netdev_compute_master_upper_features);
 
+#endif	/* CONFIG_NET */
+
 static struct hlist_head * __net_init netdev_create_hash(void)
 {
 	int i;
@@ -13019,6 +13107,8 @@ static struct pernet_operations __net_initdata netdev_net_ops = {
 	.exit = netdev_exit,
 };
 
+#ifdef CONFIG_NET
+
 static void __net_exit default_device_exit_net(struct net *net)
 {
 	struct netdev_name_node *name_node, *tmp;
@@ -13146,6 +13236,8 @@ static void __init net_dev_struct_check(void)
 	CACHELINE_ASSERT_GROUP_SIZE(struct net_device, net_device_read_rx, 92);
 }
 
+#endif	/* CONFIG_NET */
+
 /*
  *	Initialize the DEV module. At boot time this walks the device list and
  *	unhooks any devices that fail to initialise (normally hardware not
@@ -13220,10 +13312,11 @@ static struct smp_hotplug_thread backlog_threads = {
  */
 static int __init net_dev_init(void)
 {
-	int i, rc = -ENOMEM;
+	int rc = -ENOMEM;
 
 	BUG_ON(!dev_boot_phase);
 
+#ifdef CONFIG_NET
 	net_dev_struct_check();
 
 	if (dev_proc_init())
@@ -13231,7 +13324,9 @@ static int __init net_dev_init(void)
 
 	if (netdev_kobject_init())
 		goto out;
+#endif
 
+	int i;
 	for (i = 0; i < PTYPE_HASH_SIZE; i++)
 		INIT_LIST_HEAD(&ptype_base[i]);
 
@@ -13280,6 +13375,8 @@ static int __init net_dev_init(void)
 
 	dev_boot_phase = 0;
 
+#ifdef CONFIG_NET
+
 	/* The loopback device is special if any other network devices
 	 * is present in a network namespace the loopback device must
 	 * be present. Since we now dynamically allocate and free the
@@ -13294,10 +13391,12 @@ static int __init net_dev_init(void)
 
 	if (register_pernet_device(&default_device_ops))
 		goto out;
+#endif
 
 	open_softirq(NET_TX_SOFTIRQ, net_tx_action);
 	open_softirq(NET_RX_SOFTIRQ, net_rx_action);
 
+#ifdef CONFIG_NET
 	rc = cpuhp_setup_state_nocalls(CPUHP_NET_DEV_DEAD, "net/dev:dead",
 				       NULL, dev_cpu_dead);
 	WARN_ON(rc < 0);
@@ -13321,6 +13420,10 @@ out:
 		}
 	}
 
+#else
+	rc = 0;
+out:
+#endif
 	return rc;
 }
 

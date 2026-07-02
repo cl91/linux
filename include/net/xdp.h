@@ -477,6 +477,7 @@ out:
 	return len;
 }
 
+#ifdef CONFIG_NET
 int __xdp_rxq_info_reg(struct xdp_rxq_info *xdp_rxq,
 		       struct net_device *dev, u32 queue_index,
 		       unsigned int napi_id, u32 frag_size);
@@ -501,6 +502,23 @@ int xdp_reg_page_pool(struct page_pool *pool);
 void xdp_unreg_page_pool(const struct page_pool *pool);
 void xdp_rxq_info_attach_page_pool(struct xdp_rxq_info *xdp_rxq,
 				   const struct page_pool *pool);
+
+#else
+
+static inline int xdp_rxq_info_reg(struct xdp_rxq_info *xdp_rxq,
+				   struct net_device *dev, u32 queue_index,
+				   unsigned int napi_id) { return 0; }
+static inline bool xdp_rxq_info_is_reg(struct xdp_rxq_info *xdp_rxq) { return false; }
+static inline void xdp_rxq_info_unreg(struct xdp_rxq_info *xdp_rxq) {}
+static inline int xdp_rxq_info_reg_mem_model(struct xdp_rxq_info *xdp_rxq,
+					     enum xdp_mem_type type,
+					     void *allocator) { return 0; }
+static inline void xdp_rxq_info_unreg_mem_model(struct xdp_rxq_info *xdp_rxq) {}
+static inline int xdp_reg_mem_model(struct xdp_mem_info *mem,
+				    enum xdp_mem_type type, void *allocator) { return 0; }
+static inline void xdp_unreg_mem_model(struct xdp_mem_info *mem) {}
+
+#endif	/* CONFIG_NET */
 
 /**
  * xdp_rxq_info_attach_mem_model - attach registered mem info to RxQ info

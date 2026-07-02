@@ -387,6 +387,8 @@ ssize_t sysfs_format_mac(char *buf, const unsigned char *addr, int len)
 }
 EXPORT_SYMBOL(sysfs_format_mac);
 
+#ifdef CONFIG_NET
+
 struct sk_buff *eth_gro_receive(struct list_head *head, struct sk_buff *skb)
 {
 	const struct packet_offload *ptype;
@@ -475,6 +477,8 @@ static int __init eth_offload_init(void)
 }
 
 fs_initcall(eth_offload_init);
+
+#endif	/* CONFIG_NET */
 
 unsigned char * __weak arch_get_platform_mac_address(void)
 {

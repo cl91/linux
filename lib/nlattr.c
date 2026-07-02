@@ -886,7 +886,7 @@ int nla_strcmp(const struct nlattr *nla, const char *str)
 }
 EXPORT_SYMBOL(nla_strcmp);
 
-#ifdef CONFIG_NET
+#ifdef CONFIG_NET_BASE
 /**
  * __nla_reserve - reserve room for attribute on the skb
  * @skb: socket buffer to reserve room on

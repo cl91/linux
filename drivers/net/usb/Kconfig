@@ -3,12 +3,12 @@
 # USB Network devices configuration
 #
 comment "Host-side USB support is needed for USB Network Adapter support"
-	depends on !USB && NET
+	depends on !USB && NET_BASE
 
 menuconfig USB_NET_DRIVERS
 	tristate "USB Network Adapters"
 	default USB if USB
-	depends on USB && NET
+	depends on USB && NET_BASE
 
 if USB_NET_DRIVERS
 

@@ -340,6 +340,8 @@ int dev_set_mac_address(struct net_device *dev, struct sockaddr_storage *ss,
 }
 EXPORT_SYMBOL(dev_set_mac_address);
 
+#ifdef CONFIG_NET
+
 int dev_xdp_propagate(struct net_device *dev, struct netdev_bpf *bpf)
 {
 	int ret;
@@ -351,6 +353,8 @@ int dev_xdp_propagate(struct net_device *dev, struct netdev_bpf *bpf)
 	return ret;
 }
 EXPORT_SYMBOL_GPL(dev_xdp_propagate);
+
+#endif	/* CONFIG_NET */
 
 /**
  * netdev_state_change() - device changes state
@@ -368,6 +372,8 @@ void netdev_state_change(struct net_device *dev)
 }
 EXPORT_SYMBOL(netdev_state_change);
 
+#ifdef CONFIG_NET
+
 int dev_set_threaded(struct net_device *dev,
 		     enum netdev_napi_threaded threaded)
 {
@@ -380,3 +386,5 @@ int dev_set_threaded(struct net_device *dev,
 	return ret;
 }
 EXPORT_SYMBOL(dev_set_threaded);
+
+#endif	/* CONFIG_NET */

@@ -3,25 +3,28 @@
 # Makefile for the Linux networking core.
 #
 
-obj-y := sock.o skbuff.o datagram.o stream.o scm.o \
-	 gen_stats.o gen_estimator.o net_namespace.o secure_seq.o \
-	 flow_dissector.o
+obj-$(CONFIG_NET_BASE) := skbuff.o flow_dissector.o \
+	 gen_estimator.o gen_stats.o
+obj-$(CONFIG_NET) += sock.o datagram.o stream.o scm.o \
+	 net_namespace.o secure_seq.o
 
 obj-$(CONFIG_SYSCTL) += sysctl_net_core.o
 
-obj-y		     += dev.o dev_api.o dev_addr_lists.o dst.o netevent.o \
-			neighbour.o rtnetlink.o utils.o link_watch.o filter.o \
-			sock_diag.o dev_ioctl.o tso.o sock_reuseport.o \
-			fib_notifier.o xdp.o flow_offload.o gro.o \
-			netdev-genl.o netdev-genl-gen.o gso.o
+obj-$(CONFIG_NET_BASE) += dst.o dev.o dev_api.o dev_addr_lists.o dev_ioctl.o flow_offload.o \
+			  gso.o link_watch.o rtnetlink.o gro.o
+obj-$(CONFIG_NET) += netevent.o \
+			neighbour.o utils.o \
+			sock_diag.o tso.o sock_reuseport.o \
+			fib_notifier.o xdp.o \
+			netdev-genl.o netdev-genl-gen.o
 
 obj-$(CONFIG_NETDEV_ADDR_LIST_TEST) += dev_addr_lists_test.o
 
-obj-y += net-sysfs.o
-obj-y += hotdata.o
-obj-y += netdev_config.o
-obj-y += netdev_rx_queue.o
-obj-y += netdev_queues.o
+obj-$(CONFIG_NET_BASE) += net-sysfs.o
+obj-$(CONFIG_NET_BASE) += hotdata.o
+obj-$(CONFIG_NET) += netdev_config.o
+obj-$(CONFIG_NET) += netdev_rx_queue.o
+obj-$(CONFIG_NET) += netdev_queues.o
 obj-$(CONFIG_PAGE_POOL) += page_pool.o page_pool_user.o
 obj-$(CONFIG_PROC_FS) += net-procfs.o
 obj-$(CONFIG_NET_PKTGEN) += pktgen.o

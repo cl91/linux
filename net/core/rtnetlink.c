@@ -176,6 +176,8 @@ bool refcount_dec_and_rtnl_lock(refcount_t *r)
 }
 EXPORT_SYMBOL(refcount_dec_and_rtnl_lock);
 
+#ifdef CONFIG_NET
+
 #ifdef CONFIG_PROVE_LOCKING
 bool lockdep_rtnl_is_held(void)
 {
@@ -7137,3 +7139,5 @@ void __init rtnetlink_init(void)
 
 	rtnl_register_many(rtnetlink_rtnl_msg_handlers);
 }
+
+#endif	/* CONFIG_NET */

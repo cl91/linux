@@ -2180,19 +2180,27 @@ static void remove_queue_kobjects(struct net_device *dev)
 
 static bool net_current_may_mount(void)
 {
+#ifdef CONFIG_NET
 	struct net *net = current->nsproxy->net_ns;
 
 	return ns_capable(net->user_ns, CAP_SYS_ADMIN);
+#else
+	return false;
+#endif
 }
 
 static struct ns_common *net_grab_current_ns(void)
 {
+#ifdef CONFIG_NET
 	struct net *net = current->nsproxy->net_ns;
 #ifdef CONFIG_NET_NS
 	if (net)
 		refcount_inc(&net->passive);
 #endif
 	return net ? to_ns_common(net) : NULL;
+#else
+	return NULL;
+#endif
 }
 
 static const struct ns_common *net_initial_ns(void)
@@ -2419,4 +2427,12 @@ int __init netdev_kobject_init(void)
 {
 	kobj_ns_type_register(&net_ns_type_operations);
 	return class_register(&net_class);
+}
+
+struct net_device *to_net_dev_safe(struct device *dev)
+{
+	if (dev->class == &net_class) {
+		return to_net_dev(dev);
+	}
+	return NULL;
 }

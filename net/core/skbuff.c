@@ -154,6 +154,8 @@ drop_reasons_by_subsys[SKB_DROP_REASON_SUBSYS_NUM] = {
 };
 EXPORT_SYMBOL(drop_reasons_by_subsys);
 
+#ifdef CONFIG_NET
+
 /**
  * drop_reasons_register_subsys - register another drop reason subsystem
  * @subsys: the subsystem to register, must not be the core
@@ -191,6 +193,8 @@ void drop_reasons_unregister_subsys(enum skb_drop_reason_subsys subsys)
 	synchronize_rcu();
 }
 EXPORT_SYMBOL_GPL(drop_reasons_unregister_subsys);
+
+#endif	/* CONFIG_NET */
 
 /**
  *	skb_panic - private function for out-of-line support
@@ -240,6 +244,8 @@ static DEFINE_PER_CPU(struct napi_alloc_cache, napi_alloc_cache) = {
 	.bh_lock = INIT_LOCAL_LOCK(bh_lock),
 };
 
+#ifdef CONFIG_NET
+
 void *__napi_alloc_frag_align(unsigned int fragsz, unsigned int align_mask)
 {
 	struct napi_alloc_cache *nc = this_cpu_ptr(&napi_alloc_cache);
@@ -275,6 +281,8 @@ void *__netdev_alloc_frag_align(unsigned int fragsz, unsigned int align_mask)
 	return data;
 }
 EXPORT_SYMBOL(__netdev_alloc_frag_align);
+
+#endif	/* CONFIG_NET */
 
 /* Cache kmem_cache_size(net_hotdata.skbuff_cache) to help the compiler
  * remove dead code (and skbuff_cache_size) when CONFIG_KASAN is unset.
@@ -324,6 +332,8 @@ static inline void skbuff_clear(struct sk_buff *skb)
 	barrier();
 	memset((void *)skb + 128, 0, offsetof(struct sk_buff, tail) - 128);
 }
+
+#ifdef CONFIG_NET
 
 /**
  * napi_skb_cache_get_bulk - obtain a number of zeroed skb heads from the cache
@@ -384,6 +394,8 @@ get:
 	return total;
 }
 EXPORT_SYMBOL_GPL(napi_skb_cache_get_bulk);
+
+#endif	/* CONFIG_NET */
 
 static inline void __finalize_skb_around(struct sk_buff *skb, void *data,
 					 unsigned int size)
@@ -936,6 +948,8 @@ static void skb_clone_fraglist(struct sk_buff *skb)
 		skb_get(list);
 }
 
+#ifdef CONFIG_NET
+
 int skb_pp_cow_data(struct page_pool *pool, struct sk_buff **pskb,
 		    unsigned int headroom)
 {
@@ -1043,12 +1057,16 @@ bool napi_pp_put_page(netmem_ref netmem)
 EXPORT_SYMBOL(napi_pp_put_page);
 #endif
 
+#endif	/* CONFIG_NET */
+
 static bool skb_pp_recycle(struct sk_buff *skb, void *data)
 {
 	if (!IS_ENABLED(CONFIG_PAGE_POOL) || !skb->pp_recycle)
 		return false;
 	return napi_pp_put_page(page_to_netmem(virt_to_page(data)));
 }
+
+#ifdef CONFIG_NET
 
 /**
  * skb_pp_frag_ref() - Increase fragment references of a page pool aware skb
@@ -1080,6 +1098,8 @@ static int skb_pp_frag_ref(struct sk_buff *skb)
 	}
 	return 0;
 }
+
+#endif	/* CONFIG_NET */
 
 static void skb_kfree_head(void *head, unsigned int end_offset)
 {
@@ -1413,6 +1433,8 @@ void skb_dump(const char *level, const struct sk_buff *skb, bool full_pkt)
 }
 EXPORT_SYMBOL(skb_dump);
 
+#ifdef CONFIG_NET
+
 /**
  *	skb_tx_error - report an sk_buff xmit error
  *	@skb: buffer that triggered an error
@@ -1462,6 +1484,8 @@ void __consume_stateless_skb(struct sk_buff *skb)
 	skb_release_data(skb, SKB_CONSUMED);
 	kfree_skbmem(skb);
 }
+
+#endif	/* CONFIG_NET */
 
 static void napi_skb_cache_put(struct sk_buff *skb)
 {
@@ -1637,6 +1661,8 @@ static struct sk_buff *__skb_clone(struct sk_buff *n, struct sk_buff *skb)
 	return n;
 #undef C
 }
+
+#ifdef CONFIG_NET
 
 /**
  * alloc_skb_for_msg() - allocate sk_buff to wrap frag list forming a msg
@@ -1950,6 +1976,8 @@ int skb_zerocopy_iter_stream(struct sock *sk, struct sk_buff *skb,
 }
 EXPORT_SYMBOL_GPL(skb_zerocopy_iter_stream);
 
+#endif	/* CONFIG_NET */
+
 void __skb_zcopy_downgrade_managed(struct sk_buff *skb)
 {
 	int i;
@@ -2158,6 +2186,8 @@ static inline int skb_alloc_rx_flag(const struct sk_buff *skb)
 	return 0;
 }
 
+#ifdef CONFIG_NET
+
 /**
  *	skb_copy	-	create private copy of an sk_buff
  *	@skb: buffer to copy
@@ -2205,6 +2235,8 @@ struct sk_buff *skb_copy(const struct sk_buff *skb, gfp_t gfp_mask)
 	return n;
 }
 EXPORT_SYMBOL(skb_copy);
+
+#endif	/* CONFIG_NET */
 
 /**
  *	__pskb_copy_fclone	-  create copy of an sk_buff with private head.
@@ -2444,6 +2476,8 @@ int __skb_unclone_keeptruesize(struct sk_buff *skb, gfp_t pri)
 	return 0;
 }
 
+#ifdef CONFIG_NET
+
 /**
  *	skb_expand_head - reallocate header of &sk_buff
  *	@skb: buffer to reallocate
@@ -2560,6 +2594,8 @@ struct sk_buff *skb_copy_expand(const struct sk_buff *skb,
 	return n;
 }
 EXPORT_SYMBOL(skb_copy_expand);
+
+#endif	/* CONFIG_NET */
 
 /**
  *	__skb_pad		-	zero pad the tail of an skb
@@ -2817,6 +2853,8 @@ done:
 }
 EXPORT_SYMBOL(___pskb_trim);
 
+#ifdef CONFIG_NET
+
 /* Note : use pskb_trim_rcsum() instead of calling this directly
  */
 int pskb_trim_rcsum_slow(struct sk_buff *skb, unsigned int len)
@@ -2837,6 +2875,8 @@ int pskb_trim_rcsum_slow(struct sk_buff *skb, unsigned int len)
 	return __pskb_trim(skb, len);
 }
 EXPORT_SYMBOL(pskb_trim_rcsum_slow);
+
+#endif	/* CONFIG_NET */
 
 /**
  *	__pskb_pull_tail - advance tail of skb header
@@ -3087,6 +3127,8 @@ fault:
 	return -EFAULT;
 }
 EXPORT_SYMBOL(skb_copy_bits);
+
+#ifdef CONFIG_NET
 
 /*
  * Callback from splice_to_pipe(), if we need to release some pages
@@ -3516,6 +3558,8 @@ fault:
 }
 EXPORT_SYMBOL(skb_store_bits);
 
+#endif	/* CONFIG_NET */
+
 /* Checksum skb data. */
 __wsum skb_checksum(const struct sk_buff *skb, int offset, int len, __wsum csum)
 {
@@ -3818,6 +3862,8 @@ __sum16 __skb_checksum_complete(struct sk_buff *skb)
 }
 EXPORT_SYMBOL(__skb_checksum_complete);
 
+#ifdef CONFIG_NET
+
  /**
  *	skb_zerocopy_headlen - Calculate headroom needed for skb_zerocopy()
  *	@from: source buffer
@@ -3922,6 +3968,8 @@ skb_zerocopy(struct sk_buff *to, struct sk_buff *from, int len, int hlen)
 	return 0;
 }
 EXPORT_SYMBOL_GPL(skb_zerocopy);
+
+#endif	/* CONFIG_NET */
 
 void skb_copy_and_csum_dev(const struct sk_buff *skb, u8 *to)
 {
@@ -4213,6 +4261,8 @@ static inline void skb_split_no_header(struct sk_buff *skb,
 	skb1->unreadable = skb->unreadable;
 }
 
+#ifdef CONFIG_NET
+
 /**
  * skb_split - Split fragmented skb to two parts at length len.
  * @skb: the buffer to split
@@ -4234,6 +4284,8 @@ void skb_split(struct sk_buff *skb, struct sk_buff *skb1, const u32 len)
 		skb_split_no_header(skb, skb1, len, pos);
 }
 EXPORT_SYMBOL(skb_split);
+
+#endif	/* CONFIG_NET */
 
 /* Shifting from/to a cloned skb is a no-go.
  *
@@ -4647,6 +4699,8 @@ void *skb_pull_rcsum(struct sk_buff *skb, unsigned int len)
 	return skb->data;
 }
 EXPORT_SYMBOL_GPL(skb_pull_rcsum);
+
+#ifdef CONFIG_NET
 
 static inline skb_frag_t skb_head_frag_to_page_desc(struct sk_buff *frag_skb)
 {
@@ -5114,6 +5168,8 @@ err:
 }
 EXPORT_SYMBOL_GPL(skb_segment);
 
+#endif	/* CONFIG_NET */
+
 #ifdef CONFIG_SKB_EXTENSIONS
 #define SKB_EXT_ALIGN_VALUE	8
 #define SKB_EXT_CHUNKSIZEOF(x)	(ALIGN((sizeof(x)), SKB_EXT_ALIGN_VALUE) / SKB_EXT_ALIGN_VALUE)
@@ -5210,6 +5266,8 @@ void __init skb_init(void)
 						NULL);
 	skb_extensions_init();
 }
+
+#ifdef CONFIG_NET
 
 static int
 __skb_to_sgvec(struct sk_buff *skb, struct scatterlist *sg, int offset, int len,
@@ -5445,6 +5503,8 @@ int skb_cow_data(struct sk_buff *skb, int tailbits, struct sk_buff **trailer)
 	return elt;
 }
 EXPORT_SYMBOL_GPL(skb_cow_data);
+
+#endif	/* CONFIG_NET */
 
 static void sock_rmem_free(struct sk_buff *skb)
 {
@@ -5754,6 +5814,8 @@ void skb_tstamp_tx(struct sk_buff *orig_skb,
 			       SCM_TSTAMP_SND);
 }
 EXPORT_SYMBOL_GPL(skb_tstamp_tx);
+
+#ifdef CONFIG_NET
 
 #ifdef CONFIG_WIRELESS
 void skb_complete_wifi_ack(struct sk_buff *skb, bool acked)
@@ -6284,6 +6346,8 @@ void skb_scrub_packet(struct sk_buff *skb, bool xnet)
 }
 EXPORT_SYMBOL_GPL(skb_scrub_packet);
 
+#endif	/* CONFIG_NET */
+
 static struct sk_buff *skb_reorder_vlan_header(struct sk_buff *skb)
 {
 	int mac_len, meta_len;
@@ -6362,6 +6426,8 @@ int skb_ensure_writable(struct sk_buff *skb, unsigned int write_len)
 	return pskb_expand_head(skb, 0, 0, GFP_ATOMIC);
 }
 EXPORT_SYMBOL(skb_ensure_writable);
+
+#ifdef CONFIG_NET
 
 int skb_ensure_writable_head_tail(struct sk_buff *skb, struct net_device *dev)
 {
@@ -7018,6 +7084,8 @@ struct sk_buff *pskb_extract(struct sk_buff *skb, int off,
 }
 EXPORT_SYMBOL(pskb_extract);
 
+#endif	/* CONFIG_NET */
+
 /**
  * skb_condense - try to get rid of fragments/frag_list if possible
  * @skb: buffer
@@ -7050,6 +7118,8 @@ void skb_condense(struct sk_buff *skb)
 	skb->truesize = SKB_TRUESIZE(skb_end_offset(skb));
 }
 EXPORT_SYMBOL(skb_condense);
+
+#ifdef CONFIG_NET
 
 #ifdef CONFIG_SKB_EXTENSIONS
 static void *skb_ext_get_ptr(struct skb_ext *ext, enum skb_ext_id id)
@@ -7251,6 +7321,8 @@ free_now:
 EXPORT_SYMBOL(__skb_ext_put);
 #endif /* CONFIG_SKB_EXTENSIONS */
 
+#endif	/* CONFIG_NET */
+
 static void kfree_skb_napi_cache(struct sk_buff *skb)
 {
 	/* if SKB is a clone, don't handle this case */
@@ -7315,6 +7387,8 @@ nodefer:	kfree_skb_napi_cache(skb);
 	if (unlikely(kick))
 		kick_defer_list_purge(cpu);
 }
+
+#ifdef CONFIG_NET
 
 static void skb_splice_csum_page(struct sk_buff *skb, struct page *page,
 				 size_t offset, size_t len)
@@ -7441,6 +7515,8 @@ bool csum_and_copy_from_iter_full(void *addr, size_t bytes,
 	return false;
 }
 EXPORT_SYMBOL(csum_and_copy_from_iter_full);
+
+#endif	/* CONFIG_NET */
 
 void __get_netmem(netmem_ref netmem)
 {

@@ -3,11 +3,16 @@
 # Network configuration
 #
 
+config NET_BASE
+	bool
+	select NLATTR
+
 menuconfig NET
 	bool "Networking support"
-	select NLATTR
+	depends on KERNEL
 	select GENERIC_NET_UTILS
 	select BPF
+	select NET_BASE
 	help
 	  Unless you really know what you are doing, you should say Y here.
 	  The reason is that some programs need kernel networking support even
@@ -46,6 +51,8 @@ config COMPAT_NETLINK_MESSAGES
 	  Newly written code should NEVER need this option but do
 	  compat-independent messages instead!
 
+endif
+
 config NET_INGRESS
 	bool
 
@@ -78,6 +85,8 @@ config NET_SHAPER
 config NET_CRC32C
 	bool
 	select CRC32
+
+if NET
 
 menu "Networking options"
 
@@ -487,12 +496,16 @@ config NET_SOCK_MSG
 	  ULPs (upper layer modules, e.g. TLS) to process L7 application data
 	  with the help of BPF programs.
 
+endif
+
 config NET_DEVLINK
 	bool
 	default n
 
 config PAGE_POOL
 	bool
+
+if NET
 
 config PAGE_POOL_STATS
 	default n
