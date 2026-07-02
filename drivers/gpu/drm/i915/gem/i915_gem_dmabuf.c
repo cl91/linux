@@ -8,7 +8,9 @@
 #include <linux/dma-resv.h>
 #include <linux/module.h>
 
+#ifdef CONFIG_X86
 #include <asm/smp.h>
+#endif
 
 #include "gem/i915_gem_dmabuf.h"
 #include "i915_drv.h"
@@ -258,7 +260,9 @@ static int i915_gem_object_get_pages_dmabuf(struct drm_i915_gem_object *obj)
 	 */
 	if (i915_gem_object_can_bypass_llc(obj) ||
 	    (!HAS_LLC(i915) && !IS_DG1(i915)))
+#ifndef CONFIG_NTOS
 		wbinvd_on_all_cpus();
+#endif
 
 	__i915_gem_object_set_pages(obj, sgt);
 

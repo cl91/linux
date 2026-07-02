@@ -232,6 +232,7 @@ static void fixed_450mhz_get_cdclk(struct intel_display *display,
 static void i85x_get_cdclk(struct intel_display *display,
 			   struct intel_cdclk_config *cdclk_config)
 {
+#ifndef CONFIG_NTOS
 	struct pci_dev *pdev = to_pci_dev(display->drm->dev);
 	u16 hpllcc = 0;
 
@@ -269,6 +270,7 @@ static void i85x_get_cdclk(struct intel_display *display,
 		cdclk_config->cdclk = 266667;
 		break;
 	}
+#endif
 }
 
 static void i915gm_get_cdclk(struct intel_display *display,

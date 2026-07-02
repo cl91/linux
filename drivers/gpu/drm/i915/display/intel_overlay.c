@@ -213,6 +213,7 @@ struct intel_overlay {
 static void i830_overlay_clock_gating(struct intel_display *display,
 				      bool enable)
 {
+#ifndef CONFIG_NTOS
 	struct pci_dev *pdev = to_pci_dev(display->drm->dev);
 	u8 val;
 
@@ -231,6 +232,7 @@ static void i830_overlay_clock_gating(struct intel_display *display,
 		val |= I830_L2_CACHE_CLOCK_GATE_DISABLE;
 	pci_bus_write_config_byte(pdev->bus,
 				  PCI_DEVFN(0, 0), I830_CLOCK_GATE, val);
+#endif
 }
 
 static struct i915_request *
