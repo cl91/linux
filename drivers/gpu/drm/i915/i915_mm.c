@@ -55,9 +55,14 @@ static int remap_sg(pte_t *pte, unsigned long addr, void *data)
 	if (GEM_WARN_ON(!r->sgt.sgp))
 		return -EINVAL;
 
+#ifdef CONFIG_NTOS
+	/* TODO */
+	BUG_ON(1);
+#else
 	/* Special PTE are not associated with any struct page */
 	set_pte_at(r->mm, addr, pte,
 		   pte_mkspecial(pfn_pte(sgt_pfn(r), r->prot)));
+#endif
 	r->pfn++; /* track insertions in case we need to unwind later */
 
 	r->sgt.curr += PAGE_SIZE;

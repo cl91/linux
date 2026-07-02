@@ -3,8 +3,10 @@
  * Copyright © 2020 Intel Corporation
  */
 
+#ifdef CONFIG_X86
 #include <asm/set_memory.h>
 #include <asm/smp.h>
+#endif
 #include <linux/types.h>
 #include <linux/stop_machine.h>
 
@@ -1675,8 +1677,12 @@ void i915_ggtt_resume(struct i915_ggtt *ggtt)
 
 	ggtt->invalidate(ggtt);
 
+#ifdef CONFIG_NTOS
+	(void)(flush);
+#else
 	if (flush)
 		wbinvd_on_all_cpus();
+#endif
 
 	intel_ggtt_restore_fences(ggtt);
 }

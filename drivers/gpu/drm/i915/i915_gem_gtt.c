@@ -12,8 +12,10 @@
 #include <linux/seq_file.h>
 #include <linux/stop_machine.h>
 
+#ifdef CONFIG_X86
 #include <asm/set_memory.h>
 #include <asm/smp.h>
+#endif
 
 #include "gt/intel_gt.h"
 #include "gt/intel_gt_requests.h"

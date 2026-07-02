@@ -48,6 +48,8 @@
 #include <drm/drm_probe_helper.h>
 #include <drm/intel/display_member.h>
 #include <drm/intel/display_parent_interface.h>
+#include <drm/intel/i915_drm.h>
+#include <drm/intel/pciids.h>
 
 #include "display/i9xx_display_sr.h"
 #include "display/intel_bw.h"
@@ -817,6 +819,210 @@ i915_driver_create(struct pci_dev *pdev, const struct pci_device_id *ent)
 	return i915;
 }
 
+#ifndef CONFIG_KERNEL
+
+static inline u32 read_pci_config(struct pci_dev *dev, u16 offset)
+{
+	u32 val = 0;
+	pci_read_config_dword(dev, offset, &val);
+	return val;
+}
+
+static inline u16 read_pci_config_16(struct pci_dev *dev, u16 offset)
+{
+	u16 val = 0;
+	pci_read_config_word(dev, offset, &val);
+	return val;
+}
+
+struct resource intel_graphics_stolen_res __ro_after_init = DEFINE_RES_MEM(0, 0);
+EXPORT_SYMBOL(intel_graphics_stolen_res);
+
+static resource_size_t gen3_stolen_base(struct pci_dev *dev,
+					resource_size_t stolen_size)
+{
+	u32 bsm;
+
+	/* Almost universally we can find the Graphics Base of Stolen Memory
+	 * at register BSM (0x5c) in the igfx configuration space. On a few
+	 * (desktop) machines this is also mirrored in the bridge device at
+	 * different locations, or in the MCHBAR.
+	 */
+	bsm = read_pci_config(dev, INTEL_BSM);
+
+	return bsm & INTEL_BSM_MASK;
+}
+
+static resource_size_t gen11_stolen_base(struct pci_dev *dev,
+					 resource_size_t stolen_size)
+{
+	u64 bsm;
+
+	bsm = read_pci_config(dev, INTEL_GEN11_BSM_DW0);
+	bsm &= INTEL_BSM_MASK;
+	bsm |= (u64)read_pci_config(dev, INTEL_GEN11_BSM_DW1) << 32;
+
+	return bsm;
+}
+
+#define KB(x)	((x) * 1024UL)
+#define MB(x)	(KB (KB (x)))
+
+static resource_size_t gen6_stolen_size(struct pci_dev *dev)
+{
+	u16 gmch_ctrl;
+	u16 gms;
+
+	gmch_ctrl = read_pci_config_16(dev, SNB_GMCH_CTRL);
+	gms = (gmch_ctrl >> SNB_GMCH_GMS_SHIFT) & SNB_GMCH_GMS_MASK;
+
+	return gms * MB(32);
+}
+
+static resource_size_t gen8_stolen_size(struct pci_dev *dev)
+{
+	u16 gmch_ctrl;
+	u16 gms;
+
+	gmch_ctrl = read_pci_config_16(dev, SNB_GMCH_CTRL);
+	gms = (gmch_ctrl >> BDW_GMCH_GMS_SHIFT) & BDW_GMCH_GMS_MASK;
+
+	return gms * MB(32);
+}
+
+static resource_size_t chv_stolen_size(struct pci_dev *dev)
+{
+	u16 gmch_ctrl;
+	u16 gms;
+
+	gmch_ctrl = read_pci_config_16(dev, SNB_GMCH_CTRL);
+	gms = (gmch_ctrl >> SNB_GMCH_GMS_SHIFT) & SNB_GMCH_GMS_MASK;
+
+	/*
+	 * 0x0  to 0x10: 32MB increments starting at 0MB
+	 * 0x11 to 0x16: 4MB increments starting at 8MB
+	 * 0x17 to 0x1d: 4MB increments start at 36MB
+	 */
+	if (gms < 0x11)
+		return gms * MB(32);
+	else if (gms < 0x17)
+		return (gms - 0x11) * MB(4) + MB(8);
+	else
+		return (gms - 0x17) * MB(4) + MB(36);
+}
+
+static resource_size_t gen9_stolen_size(struct pci_dev *dev)
+{
+	u16 gmch_ctrl;
+	u16 gms;
+
+	gmch_ctrl = read_pci_config_16(dev, SNB_GMCH_CTRL);
+	gms = (gmch_ctrl >> BDW_GMCH_GMS_SHIFT) & BDW_GMCH_GMS_MASK;
+
+	/* 0x0  to 0xef: 32MB increments starting at 0MB */
+	/* 0xf0 to 0xfe: 4MB increments starting at 4MB */
+	if (gms < 0xf0)
+		return gms * MB(32);
+	else
+		return (gms - 0xf0) * MB(4) + MB(4);
+}
+
+struct intel_early_ops {
+	resource_size_t (*stolen_size)(struct pci_dev *dev);
+	resource_size_t (*stolen_base)(struct pci_dev *dev,
+				       resource_size_t size);
+};
+
+static const struct intel_early_ops gen6_early_ops = {
+	.stolen_base = gen3_stolen_base,
+	.stolen_size = gen6_stolen_size,
+};
+
+static const struct intel_early_ops gen8_early_ops = {
+	.stolen_base = gen3_stolen_base,
+	.stolen_size = gen8_stolen_size,
+};
+
+static const struct intel_early_ops gen9_early_ops = {
+	.stolen_base = gen3_stolen_base,
+	.stolen_size = gen9_stolen_size,
+};
+
+static const struct intel_early_ops chv_early_ops = {
+	.stolen_base = gen3_stolen_base,
+	.stolen_size = chv_stolen_size,
+};
+
+static const struct intel_early_ops gen11_early_ops = {
+	.stolen_base = gen11_stolen_base,
+	.stolen_size = gen9_stolen_size,
+};
+
+/* Intel integrated GPUs for which we need to reserve "stolen memory" */
+static const struct pci_device_id intel_early_ids[] = {
+	INTEL_VLV_IDS(INTEL_VGA_DEVICE, &gen6_early_ops),
+	INTEL_SNB_IDS(INTEL_VGA_DEVICE, &gen6_early_ops),
+	INTEL_IVB_IDS(INTEL_VGA_DEVICE, &gen6_early_ops),
+	INTEL_HSW_IDS(INTEL_VGA_DEVICE, &gen6_early_ops),
+	INTEL_BDW_IDS(INTEL_VGA_DEVICE, &gen8_early_ops),
+	INTEL_CHV_IDS(INTEL_VGA_DEVICE, &chv_early_ops),
+	INTEL_SKL_IDS(INTEL_VGA_DEVICE, &gen9_early_ops),
+	INTEL_BXT_IDS(INTEL_VGA_DEVICE, &gen9_early_ops),
+	INTEL_KBL_IDS(INTEL_VGA_DEVICE, &gen9_early_ops),
+	INTEL_CFL_IDS(INTEL_VGA_DEVICE, &gen9_early_ops),
+	INTEL_WHL_IDS(INTEL_VGA_DEVICE, &gen9_early_ops),
+	INTEL_CML_IDS(INTEL_VGA_DEVICE, &gen9_early_ops),
+	INTEL_GLK_IDS(INTEL_VGA_DEVICE, &gen9_early_ops),
+	INTEL_CNL_IDS(INTEL_VGA_DEVICE, &gen9_early_ops),
+	INTEL_ICL_IDS(INTEL_VGA_DEVICE, &gen11_early_ops),
+	INTEL_EHL_IDS(INTEL_VGA_DEVICE, &gen11_early_ops),
+	INTEL_JSL_IDS(INTEL_VGA_DEVICE, &gen11_early_ops),
+	INTEL_TGL_IDS(INTEL_VGA_DEVICE, &gen11_early_ops),
+	INTEL_RKL_IDS(INTEL_VGA_DEVICE, &gen11_early_ops),
+	INTEL_ADLS_IDS(INTEL_VGA_DEVICE, &gen11_early_ops),
+	INTEL_ADLP_IDS(INTEL_VGA_DEVICE, &gen11_early_ops),
+	INTEL_ADLN_IDS(INTEL_VGA_DEVICE, &gen11_early_ops),
+	INTEL_RPLS_IDS(INTEL_VGA_DEVICE, &gen11_early_ops),
+	INTEL_RPLU_IDS(INTEL_VGA_DEVICE, &gen11_early_ops),
+	INTEL_RPLP_IDS(INTEL_VGA_DEVICE, &gen11_early_ops),
+};
+
+static void intel_graphics_stolen(struct pci_dev *dev)
+{
+	const struct intel_early_ops *early_ops = NULL;
+
+	for (int i = 0; i < ARRAY_SIZE(intel_early_ids); i++) {
+		kernel_ulong_t driver_data = intel_early_ids[i].driver_data;
+
+		if (intel_early_ids[i].device != dev->device)
+			continue;
+
+		early_ops = (typeof(early_ops))driver_data;
+		break;
+	}
+
+	BUG_ON(!early_ops);
+
+	resource_size_t base, size;
+	resource_size_t end;
+
+	size = early_ops->stolen_size(dev);
+	base = early_ops->stolen_base(dev, size);
+
+	if (!size || !base)
+		return;
+
+	end = base + size - 1;
+
+	intel_graphics_stolen_res.start = base;
+	intel_graphics_stolen_res.end = end;
+
+	printk(KERN_INFO "Reserving Intel graphics memory at %pR\n",
+	       &intel_graphics_stolen_res);
+}
+
+#endif
+
 /**
  * i915_driver_probe - setup chip and create an initial config
  * @pdev: PCI device
@@ -839,6 +1045,10 @@ int i915_driver_probe(struct pci_dev *pdev, const struct pci_device_id *ent)
 		pr_err("Failed to enable graphics device: %pe\n", ERR_PTR(ret));
 		return ret;
 	}
+
+#ifndef CONFIG_KERNEL
+	intel_graphics_stolen(pdev);
+#endif
 
 	i915 = i915_driver_create(pdev, ent);
 	if (IS_ERR(i915)) {
