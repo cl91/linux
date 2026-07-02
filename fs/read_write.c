@@ -26,6 +26,8 @@
 #include <linux/uaccess.h>
 #include <asm/unistd.h>
 
+#ifdef CONFIG_KERNEL
+
 const struct file_operations generic_ro_fops = {
 	.llseek		= generic_file_llseek,
 	.read_iter	= generic_file_read_iter,
@@ -35,6 +37,8 @@ const struct file_operations generic_ro_fops = {
 };
 
 EXPORT_SYMBOL(generic_ro_fops);
+
+#endif	/* CONFIG_KERNEL */
 
 static inline bool unsigned_offsets(struct file *file)
 {
@@ -392,6 +396,8 @@ loff_t vfs_llseek(struct file *file, loff_t offset, int whence)
 }
 EXPORT_SYMBOL(vfs_llseek);
 
+#ifdef CONFIG_KERNEL
+
 static off_t ksys_lseek(unsigned int fd, off_t offset, unsigned int whence)
 {
 	off_t retval;
@@ -449,6 +455,8 @@ SYSCALL_DEFINE5(llseek, unsigned int, fd, unsigned long, offset_high,
 	return retval;
 }
 #endif
+
+#endif	/* CONFIG_KERNEL */
 
 int rw_verify_area(int read_write, struct file *file, const loff_t *ppos, size_t count)
 {
@@ -696,6 +704,8 @@ ssize_t vfs_write(struct file *file, const char __user *buf, size_t count, loff_
 	file_end_write(file);
 	return ret;
 }
+
+#ifdef CONFIG_KERNEL
 
 /* file_ppos returns &file->f_pos or NULL if file is stream */
 static inline loff_t *file_ppos(struct file *file)
@@ -1821,3 +1831,5 @@ int generic_atomic_write_valid(struct kiocb *iocb, struct iov_iter *iter)
 	return 0;
 }
 EXPORT_SYMBOL_GPL(generic_atomic_write_valid);
+
+#endif	/* CONFIG_KERNEL */

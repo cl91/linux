@@ -341,6 +341,8 @@ unsigned long msleep_interruptible(unsigned int msecs)
 }
 EXPORT_SYMBOL(msleep_interruptible);
 
+#ifdef CONFIG_KERNEL
+
 /**
  * usleep_range_state - Sleep for an approximate time in a given state
  * @min:	Minimum time in usecs to sleep
@@ -375,3 +377,5 @@ void __sched usleep_range_state(unsigned long min, unsigned long max, unsigned i
 	}
 }
 EXPORT_SYMBOL(usleep_range_state);
+
+#endif	/* CONFIG_KERNEL */

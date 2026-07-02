@@ -314,6 +314,8 @@ void *memdup_user_nul(const void __user *src, size_t len)
 }
 EXPORT_SYMBOL(memdup_user_nul);
 
+#ifdef CONFIG_KERNEL
+
 /* Check if the vma is being used as a stack by this task */
 int vma_is_stack_for_current(const struct vm_area_struct *vma)
 {
@@ -321,6 +323,8 @@ int vma_is_stack_for_current(const struct vm_area_struct *vma)
 
 	return (vma->vm_start <= KSTK_ESP(t) && vma->vm_end >= KSTK_ESP(t));
 }
+
+#endif	/* CONFIG_KERNEL */
 
 /*
  * Change backing file, only valid to use during initial VMA setup.
@@ -333,6 +337,8 @@ void vma_set_file(struct vm_area_struct *vma, struct file *file)
 	fput(file);
 }
 EXPORT_SYMBOL(vma_set_file);
+
+#ifdef CONFIG_KERNEL
 
 #ifndef STACK_RND_MASK
 #define STACK_RND_MASK (0x7ff >> (PAGE_SHIFT - 12))     /* 8MB of VA */
@@ -618,6 +624,8 @@ unsigned long vm_mmap(struct file *file, unsigned long addr,
 }
 EXPORT_SYMBOL(vm_mmap);
 
+#endif	/* CONFIG_KERNEL */
+
 /**
  * __vmalloc_array - allocate memory for a virtually contiguous array.
  * @n: number of elements.
@@ -748,6 +756,8 @@ int folio_mc_copy(struct folio *dst, struct folio *src)
 	return 0;
 }
 EXPORT_SYMBOL(folio_mc_copy);
+
+#ifdef CONFIG_KERNEL
 
 int sysctl_overcommit_memory __read_mostly = OVERCOMMIT_GUESS;
 static int sysctl_overcommit_ratio __read_mostly = 50;
@@ -1134,6 +1144,8 @@ void flush_dcache_folio(struct folio *folio)
 EXPORT_SYMBOL(flush_dcache_folio);
 #endif
 
+#endif	/* CONFIG_KERNEL */
+
 /**
  * __compat_vma_mmap() - See description for compat_vma_mmap()
  * for details. This is the same operation, only with a specific file operations
@@ -1312,7 +1324,7 @@ static int mmap_action_finish(struct mmap_action *action,
 	return 0;
 }
 
-#ifdef CONFIG_MMU
+#if defined(CONFIG_MMU) || defined(CONFIG_NTOS)
 /**
  * mmap_action_prepare - Perform preparatory setup for an VMA descriptor
  * action which need to be performed.
@@ -1404,6 +1416,7 @@ int mmap_action_complete(struct mmap_action *action,
 EXPORT_SYMBOL(mmap_action_complete);
 #endif
 
+#ifdef CONFIG_KERNEL
 #ifdef CONFIG_MMU
 /**
  * folio_pte_batch - detect a PTE batch for a large folio
@@ -1468,3 +1481,5 @@ bool page_range_contiguous(const struct page *page, unsigned long nr_pages)
 }
 EXPORT_SYMBOL(page_range_contiguous);
 #endif
+
+#endif	/* CONFIG_KERNEL */

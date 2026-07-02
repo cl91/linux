@@ -2,6 +2,8 @@
 #ifndef _ASM_X86_ELF_H
 #define _ASM_X86_ELF_H
 
+#ifndef CONFIG_NTOS
+
 /*
  * ELF register definitions..
  */
@@ -19,6 +21,8 @@ typedef unsigned long elf_greg_t;
 typedef elf_greg_t elf_gregset_t[ELF_NGREG];
 
 typedef struct user_i387_struct elf_fpregset_t;
+
+#endif	/* !CONFIG_NTOS */
 
 #ifdef __i386__
 
@@ -73,6 +77,8 @@ typedef struct user_i387_struct elf_fpregset_t;
 #define ELF_ARCH	EM_X86_64
 
 #endif
+
+#ifndef CONFIG_NTOS
 
 #include <asm/vdso.h>
 
@@ -389,4 +395,7 @@ struct va_alignment {
 } ____cacheline_aligned;
 
 extern struct va_alignment va_align;
+
+#endif	/* !CONFIG_NTOS */
+
 #endif /* _ASM_X86_ELF_H */

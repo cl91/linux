@@ -26,12 +26,14 @@
 #include <trace/events/pci.h>
 #include "pci.h"
 
+#ifdef CONFIG_KERNEL
 static struct resource busn_resource = {
 	.name	= "PCI busn",
 	.start	= 0,
 	.end	= 255,
 	.flags	= IORESOURCE_BUS,
 };
+#endif
 
 /* Ugh.  Need to stop exporting this to modules. */
 LIST_HEAD(pci_root_buses);
@@ -513,6 +515,8 @@ static void pci_read_bridge_mmio_pref(struct pci_dev *dev, struct resource *res,
 	}
 }
 
+#ifdef CONFIG_KERNEL
+
 static void pci_read_bridge_windows(struct pci_dev *bridge)
 {
 	u32 buses;
@@ -578,6 +582,8 @@ static void pci_read_bridge_windows(struct pci_dev *bridge)
 
 	pci_read_bridge_mmio_pref(bridge, &res, true);
 }
+
+#endif	/* CONFIG_KERNEL */
 
 void pci_read_bridge_bases(struct pci_bus *child)
 {
@@ -834,6 +840,8 @@ void pcie_update_link_speed(struct pci_bus *bus,
 }
 EXPORT_SYMBOL_GPL(pcie_update_link_speed);
 
+#ifdef CONFIG_KERNEL
+
 static unsigned char agp_speeds[] = {
 	AGP_UNKNOWN,
 	AGP_1X,
@@ -920,6 +928,8 @@ static void pci_set_bus_speed(struct pci_bus *bus)
 		pcie_update_link_speed(bus, PCIE_ADD_BUS);
 	}
 }
+
+#endif	/* CONFIG_KERNEL */
 
 static struct irq_domain *pci_host_bridge_msi_domain(struct pci_bus *bus)
 {
@@ -1158,6 +1168,8 @@ free:
 	return err;
 }
 
+#ifdef CONFIG_KERNEL
+
 static bool pci_bridge_child_ext_cfg_accessible(struct pci_dev *bridge)
 {
 	int pos;
@@ -1297,6 +1309,8 @@ struct pci_bus *pci_add_new_bus(struct pci_bus *parent, struct pci_dev *dev,
 }
 EXPORT_SYMBOL(pci_add_new_bus);
 
+#endif	/* CONFIG_KERNEL */
+
 static void pci_enable_rrs_sv(struct pci_dev *pdev)
 {
 	u16 root_cap = 0;
@@ -1309,6 +1323,8 @@ static void pci_enable_rrs_sv(struct pci_dev *pdev)
 		pdev->config_rrs_sv = 1;
 	}
 }
+
+#ifdef CONFIG_KERNEL
 
 static unsigned int pci_scan_child_bus_extend(struct pci_bus *bus,
 					      unsigned int available_buses);
@@ -1617,6 +1633,8 @@ static void pci_read_irq(struct pci_dev *dev)
 	dev->irq = irq;
 }
 
+#endif	/* CONFIG_KERNEL */
+
 void set_pcie_port_type(struct pci_dev *pdev)
 {
 	int pos;
@@ -1684,6 +1702,8 @@ void set_pcie_port_type(struct pci_dev *pdev)
 		}
 	}
 }
+
+#ifdef CONFIG_KERNEL
 
 void set_pcie_hotplug_bridge(struct pci_dev *pdev)
 {
@@ -1781,6 +1801,8 @@ static void pci_set_removable(struct pci_dev *dev)
 		dev_set_removable(&dev->dev, DEVICE_REMOVABLE);
 	}
 }
+
+#endif	/* CONFIG_KERNEL */
 
 /**
  * pci_ext_cfg_is_aliased - Is ext config space just an alias of std config?
@@ -1884,6 +1906,8 @@ int pci_cfg_space_size(struct pci_dev *dev)
 
 	return PCI_CFG_SPACE_SIZE;
 }
+
+#ifdef CONFIG_KERNEL
 
 static u32 pci_class(struct pci_dev *dev)
 {
@@ -2199,6 +2223,8 @@ int pci_setup_device(struct pci_dev *dev)
 	/* We found a fine healthy device, go go go... */
 	return 0;
 }
+
+#endif	/* CONFIG_KERNEL */
 
 static void pci_configure_mps(struct pci_dev *dev)
 {
@@ -2523,6 +2549,8 @@ struct pci_dev *pci_alloc_dev(struct pci_bus *bus)
 }
 EXPORT_SYMBOL(pci_alloc_dev);
 
+#ifdef CONFIG_KERNEL
+
 static bool pci_bus_wait_rrs(struct pci_bus *bus, int devfn, u32 *l,
 			     int timeout)
 {
@@ -2619,6 +2647,8 @@ static struct pci_dev *pci_scan_device(struct pci_bus *bus, int devfn)
 
 	return dev;
 }
+
+#endif	/* CONFIG_KERNEL */
 
 void pcie_report_downtraining(struct pci_dev *dev)
 {
@@ -2775,6 +2805,8 @@ void pci_device_add(struct pci_dev *dev, struct pci_bus *bus)
 
 	pci_doe_sysfs_init(dev);
 }
+
+#ifdef CONFIG_KERNEL
 
 struct pci_dev *pci_scan_single_device(struct pci_bus *bus, int devfn)
 {
@@ -3209,6 +3241,8 @@ unsigned int pci_scan_child_bus(struct pci_bus *bus)
 }
 EXPORT_SYMBOL_GPL(pci_scan_child_bus);
 
+#endif	/* CONFIG_KERNEL */
+
 /**
  * pcibios_root_bridge_prepare - Platform-specific host bridge setup
  * @bridge: Host bridge to set up
@@ -3258,6 +3292,8 @@ err_out:
 }
 EXPORT_SYMBOL_GPL(pci_create_root_bus);
 
+#ifdef CONFIG_KERNEL
+
 int pci_host_probe(struct pci_host_bridge *bridge)
 {
 	struct pci_bus *bus, *child;
@@ -3304,6 +3340,8 @@ int pci_host_probe(struct pci_host_bridge *bridge)
 }
 EXPORT_SYMBOL_GPL(pci_host_probe);
 
+#endif
+
 int pci_bus_insert_busn_res(struct pci_bus *b, int bus, int bus_max)
 {
 	struct resource *res = &b->busn_res;
@@ -3330,6 +3368,8 @@ int pci_bus_insert_busn_res(struct pci_bus *b, int bus, int bus_max)
 
 	return conflict == NULL;
 }
+
+#ifdef CONFIG_KERNEL
 
 int pci_bus_update_busn_res_end(struct pci_bus *b, int bus_max)
 {
@@ -3579,3 +3619,5 @@ int pci_hp_add_bridge(struct pci_dev *dev)
 	return 0;
 }
 EXPORT_SYMBOL_GPL(pci_hp_add_bridge);
+
+#endif	/* CONFIG_KERNEL */

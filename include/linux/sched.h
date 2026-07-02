@@ -1231,9 +1231,7 @@ struct task_struct {
 	size_t				sas_ss_size;
 	unsigned int			sas_ss_flags;
 
-#ifdef CONFIG_KERNEL
 	struct callback_head		*task_works;
-#endif
 
 #ifdef CONFIG_AUDIT
 #ifdef CONFIG_AUDITSYSCALL

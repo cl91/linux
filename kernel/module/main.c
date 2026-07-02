@@ -129,6 +129,8 @@ static void mod_update_bounds(struct module *mod)
 static int modules_disabled;
 core_param(nomodule, modules_disabled, bint, 0);
 
+#ifdef CONFIG_KERNEL
+
 static const struct ctl_table module_sysctl_table[] = {
 	{
 		.procname	= "modprobe",
@@ -156,6 +158,8 @@ static int __init init_module_sysctl(void)
 }
 
 subsys_initcall(init_module_sysctl);
+
+#endif	/* CONFIG_KERNEL */
 
 /* Waiting for a module to finish initializing? */
 static DECLARE_WAIT_QUEUE_HEAD(module_wq);
@@ -221,6 +225,8 @@ static int mod_strncmp(const char *str_a, const char *str_b, size_t n)
 	return 0;
 }
 
+#ifdef CONFIG_KERNEL
+
 /*
  * A thread that wants to hold a reference to a module only while it
  * is running can call this to safely exit.
@@ -231,6 +237,8 @@ void __noreturn __module_put_and_kthread_exit(struct module *mod, long code)
 	kthread_exit(code);
 }
 EXPORT_SYMBOL(__module_put_and_kthread_exit);
+
+#endif	/* CONFIG_KERNEL */
 
 /* Find a module section: 0 means not found. */
 static unsigned int find_sec(const struct load_info *info, const char *name)
@@ -3590,6 +3598,8 @@ SYSCALL_DEFINE3(init_module, void __user *, umod,
 	return load_module(&info, uargs, 0);
 }
 
+#ifdef CONFIG_KERNEL
+
 struct idempotent {
 	const void *cookie;
 	struct hlist_node entry;
@@ -3750,6 +3760,8 @@ SYSCALL_DEFINE3(finit_module, int, fd, const char __user *, uargs, int, flags)
 		return -EBADF;
 	return idempotent_init_module(fd_file(f), uargs, flags);
 }
+
+#endif
 
 /* Keep in sync with MODULE_FLAGS_BUF_SIZE !!! */
 char *module_flags(struct module *mod, char *buf, bool show_state)

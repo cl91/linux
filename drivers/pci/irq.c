@@ -79,6 +79,8 @@ void pci_free_irq(struct pci_dev *dev, unsigned int nr, void *dev_id)
 }
 EXPORT_SYMBOL(pci_free_irq);
 
+#ifdef CONFIG_KERNEL
+
 /**
  * pci_swizzle_interrupt_pin - swizzle INTx for device behind bridge
  * @dev: the PCI device
@@ -258,6 +260,8 @@ bool pci_check_and_unmask_intx(struct pci_dev *dev)
 	return pci_check_and_set_intx_mask(dev, false);
 }
 EXPORT_SYMBOL_GPL(pci_check_and_unmask_intx);
+
+#endif	/* CONFIG_KERNEL */
 
 /**
  * pcibios_penalize_isa_irq - penalize an ISA IRQ

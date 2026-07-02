@@ -9,6 +9,11 @@
 #include <linux/module.h>
 #include <linux/moduleloader.h>
 #include <linux/sort.h>
+#ifdef CONFIG_NTOS
+#include "../include/asm/insn.h"
+#include "../include/asm/elf.h"
+#define NR_FTRACE_PLTS		1
+#endif
 
 static struct plt_entry __get_adrp_add_pair(u64 dst, u64 pc,
 					    enum aarch64_insn_register reg)

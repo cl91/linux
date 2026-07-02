@@ -1221,7 +1221,7 @@ config ZONE_DEVICE
 #
 config HMM_MIRROR
 	bool
-	depends on MMU
+	depends on (MMU || !KERNEL)
 
 config GET_FREE_REGION
 	bool

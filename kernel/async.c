@@ -54,7 +54,9 @@ asynchronous and synchronous parts of the kernel.
 #include <linux/wait.h>
 #include <linux/workqueue.h>
 
+#ifdef CONFIG_KERNEL
 #include "workqueue_internal.h"
+#endif
 
 static async_cookie_t next_cookie = 1;
 
@@ -334,6 +336,8 @@ void async_synchronize_cookie(async_cookie_t cookie)
 }
 EXPORT_SYMBOL_GPL(async_synchronize_cookie);
 
+#ifdef CONFIG_KERNEL
+
 /**
  * current_is_async - is %current an async worker task?
  *
@@ -346,6 +350,8 @@ bool current_is_async(void)
 	return worker && worker->current_func == async_run_entry_fn;
 }
 EXPORT_SYMBOL_GPL(current_is_async);
+
+#endif	/* CONFIG_KERNEL */
 
 void __init async_init(void)
 {

@@ -52,6 +52,7 @@
    - Tasklets: serialized wrt itself.
  */
 
+#ifdef CONFIG_KERNEL
 #ifndef __ARCH_IRQ_STAT
 DEFINE_PER_CPU_ALIGNED(irq_cpustat_t, irq_stat);
 EXPORT_PER_CPU_SYMBOL(irq_stat);
@@ -60,11 +61,14 @@ EXPORT_PER_CPU_SYMBOL(irq_stat);
 static struct softirq_action softirq_vec[NR_SOFTIRQS] __cacheline_aligned_in_smp;
 
 DEFINE_PER_CPU(struct task_struct *, ksoftirqd);
+#endif	/* CONFIG_KERNEL */
 
 const char * const softirq_to_name[NR_SOFTIRQS] = {
 	"HI", "TIMER", "NET_TX", "NET_RX", "BLOCK", "IRQ_POLL",
 	"TASKLET", "SCHED", "HRTIMER", "RCU"
 };
+
+#ifdef CONFIG_KERNEL
 
 /*
  * we cannot loop indefinitely here to avoid userspace starvation,
@@ -795,6 +799,8 @@ void open_softirq(int nr, void (*action)(void))
 	softirq_vec[nr].action = action;
 }
 
+#endif	/* CONFIG_KERNEL */
+
 /*
  * Tasklets
  */
@@ -1047,6 +1053,8 @@ void __init softirq_init(void)
 	open_softirq(HI_SOFTIRQ, tasklet_hi_action);
 }
 
+#ifdef CONFIG_KERNEL
+
 static int ksoftirqd_should_run(unsigned int cpu)
 {
 	return local_softirq_pending();
@@ -1186,3 +1194,5 @@ unsigned int __weak arch_dynirq_lower_bound(unsigned int from)
 {
 	return from;
 }
+
+#endif	/* CONFIG_KERNEL */

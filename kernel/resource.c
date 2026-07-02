@@ -2149,6 +2149,8 @@ struct resource *alloc_free_mem_region(struct resource *base,
 EXPORT_SYMBOL_GPL(alloc_free_mem_region);
 #endif /* CONFIG_GET_FREE_REGION */
 
+#ifdef CONFIG_KERNEL
+
 static int __init strict_iomem(char *str)
 {
 	if (strstr(str, "relaxed"))
@@ -2203,3 +2205,5 @@ static int __init iomem_init_inode(void)
 fs_initcall(iomem_init_inode);
 
 __setup("iomem=", strict_iomem);
+
+#endif	/* CONFIG_KERNEL */
