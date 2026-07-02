@@ -283,7 +283,6 @@ static void drm_sched_entity_kill(struct drm_sched_entity *entity)
 long drm_sched_entity_flush(struct drm_sched_entity *entity, long timeout)
 {
 	struct drm_gpu_scheduler *sched;
-	struct task_struct *last_user;
 	long ret = timeout;
 
 	if (!entity->rq)
@@ -306,10 +305,13 @@ long drm_sched_entity_flush(struct drm_sched_entity *entity, long timeout)
 	}
 
 	/* For a killed process disallow further enqueueing of jobs. */
-	last_user = cmpxchg(&entity->last_user, current->group_leader, NULL);
+#ifdef CONFIG_KERNEL
+	struct task_struct *last_user = cmpxchg(&entity->last_user,
+					current->group_leader, NULL);
 	if (last_user == current->group_leader &&
 	    (current->flags & PF_EXITING) && (current->exit_code == SIGKILL))
 		drm_sched_entity_kill(entity);
+#endif
 
 	return ret;
 }
