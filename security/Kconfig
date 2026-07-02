@@ -4,6 +4,7 @@
 #
 
 menu "Security options"
+	depends on KERNEL
 
 source "security/keys/Kconfig"
 
