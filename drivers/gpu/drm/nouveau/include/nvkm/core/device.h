@@ -149,6 +149,7 @@ struct nvkm_device_oclass {
 extern const struct nvkm_sclass nvkm_udevice_sclass;
 
 /* device logging */
+#undef DEBUG
 #define nvdev_printk_(d,l,p,f,a...) do {                                       \
 	const struct nvkm_device *_device = (d);                               \
 	if (_device->debug >= (l))                                             \
