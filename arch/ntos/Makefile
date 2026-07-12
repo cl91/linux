@@ -38,7 +38,7 @@ export TARGET_ARCH_AMD64
 export TARGET_ARCH_X86
 export TARGET_ARCH_ARM64
 
-KBUILD_CFLAGS += -fno-builtin
+KBUILD_CFLAGS += -fno-builtin -DDEBUG
 LDFLAGS_vmlinux += --entry=LnxDriverEntry --error-limit=0
 
 ifeq (aarch64,$(TARGET_ARCH))
