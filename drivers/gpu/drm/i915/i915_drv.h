@@ -190,11 +190,13 @@ struct drm_i915_private {
 
 	struct intel_gvt *gvt;
 
+#ifndef CONFIG_NTOS
 	struct {
 		struct pci_dev *pdev;
 		struct resource mch_res;
 		bool mchbar_need_disable;
 	} gmch;
+#endif
 
 	/*
 	 * Chaining user engines happens in multiple stages, starting with a

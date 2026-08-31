@@ -10,6 +10,27 @@
 #include "i915_gmch.h"
 #include "intel_pci_config.h"
 
+#ifdef CONFIG_NTOS
+
+/* We don't support pre-Gen4 GMCH on NTOS */
+
+int i915_gmch_bridge_setup(struct drm_i915_private *i915)
+{
+	return 0;
+}
+
+void i915_gmch_bar_setup(struct drm_i915_private *i915)
+{
+	/* Do nothing */
+}
+
+void i915_gmch_bar_teardown(struct drm_i915_private *i915)
+{
+	/* Do nothing */
+}
+
+#else
+
 static void i915_gmch_bridge_release(struct drm_device *dev, void *bridge)
 {
 	pci_dev_put(bridge);
@@ -139,3 +160,5 @@ void i915_gmch_bar_teardown(struct drm_i915_private *i915)
 	if (i915->gmch.mch_res.start)
 		release_resource(&i915->gmch.mch_res);
 }
+
+#endif	/* CONFIG_NTOS */
