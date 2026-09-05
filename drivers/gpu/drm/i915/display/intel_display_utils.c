@@ -16,6 +16,8 @@ bool intel_display_run_as_guest(struct intel_display *display)
 {
 #if IS_ENABLED(CONFIG_X86)
 	return !hypervisor_is_type(X86_HYPER_NATIVE);
+#elif IS_ENABLED(CONFIG_NTOS)
+	return true;
 #else
 	/* Not supported yet */
 	return false;
