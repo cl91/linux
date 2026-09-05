@@ -176,10 +176,14 @@ void call_rcu(struct rcu_head *head, rcu_callback_t func)
 	rcu_ctrlblk.curtail = &head->next;
 	local_irq_restore(flags);
 
+#ifdef CONFIG_NTOS
+	rcu_qs();
+#else
 	if (unlikely(is_idle_task(current))) {
 		/* force scheduling for rcu_qs() */
 		resched_cpu(0);
 	}
+#endif
 }
 EXPORT_SYMBOL_GPL(call_rcu);
 
@@ -211,10 +215,14 @@ unsigned long start_poll_synchronize_rcu(void)
 {
 	unsigned long gp_seq = get_state_synchronize_rcu();
 
+#ifdef CONFIG_NTOS
+	rcu_qs();
+#else
 	if (unlikely(is_idle_task(current))) {
 		/* force scheduling for rcu_qs() */
 		resched_cpu(0);
 	}
+#endif
 	return gp_seq;
 }
 EXPORT_SYMBOL_GPL(start_poll_synchronize_rcu);

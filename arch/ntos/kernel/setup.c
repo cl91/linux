@@ -91,6 +91,8 @@ int __init lnxdrv_init(void)
 	radix_tree_init();
 	workqueue_init_early();
 	early_irq_init();
+	srcu_init();
+	rcu_init();
 	ksysfs_init();
 	init_timer();
 	workqueue_init();
