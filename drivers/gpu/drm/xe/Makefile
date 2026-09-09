@@ -332,7 +332,7 @@ ifeq ($(CONFIG_ACPI),y)
 		i915-display/intel_opregion.o
 endif
 
-ifeq ($(CONFIG_DRM_FBDEV_EMULATION),y)
+ifeq ($(CONFIG_DRM_CLIENT_SETUP),y)
 	xe-$(CONFIG_DRM_XE_DISPLAY) += i915-display/intel_fbdev.o
 endif
 
