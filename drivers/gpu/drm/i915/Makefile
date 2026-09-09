@@ -322,7 +322,7 @@ i915-y += \
 i915-$(CONFIG_ACPI) += \
 	display/intel_acpi.o \
 	display/intel_opregion.o
-i915-$(CONFIG_DRM_FBDEV_EMULATION) += \
+i915-$(CONFIG_DRM_CLIENT_SETUP) += \
 	display/intel_fbdev.o \
 	display/intel_fbdev_fb.o
 i915-$(CONFIG_DEBUG_FS) += \

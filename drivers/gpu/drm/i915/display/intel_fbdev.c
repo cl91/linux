@@ -64,6 +64,8 @@ struct intel_fbdev {
 	unsigned long vma_flags;
 };
 
+#ifdef CONFIG_DRM_FBDEV_EMULATION
+
 static struct intel_fbdev *to_intel_fbdev(struct drm_fb_helper *fb_helper)
 {
 	struct intel_display *display = to_intel_display(fb_helper->client.dev);
@@ -361,6 +363,8 @@ out_unlock:
 
 	return ret;
 }
+
+#endif	/* CONFIG_DRM_FBDEV_EMULATION */
 
 /*
  * Build an intel_fbdev struct using a BIOS allocated framebuffer, if possible.
